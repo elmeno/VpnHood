@@ -103,9 +103,9 @@ namespace VpnHood.Client.App {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon VpnHoodIcon {
+        internal static System.Drawing.Icon YetiVPNIcon {
             get {
-                object obj = ResourceManager.GetObject("VpnHoodIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("YetiVPNIcon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

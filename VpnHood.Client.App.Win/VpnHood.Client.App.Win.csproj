@@ -5,14 +5,14 @@
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>VpnHood.Client.App</RootNamespace>
-    <AssemblyName>VpnHoodClient</AssemblyName>
-    <ApplicationIcon>Resources\VpnHood.ico</ApplicationIcon>
+    <AssemblyName>YetiVPNClient</AssemblyName>
+    <ApplicationIcon>Resources\YetiVPN.ico</ApplicationIcon>
     <PackageProjectUrl>https://github.com/vpnhood/vpnhood</PackageProjectUrl>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
     <Authors>VpnHood</Authors>
     <Company>VpnHood</Company>
     <RepositoryUrl>https://github.com/vpnhood/vpnhood</RepositoryUrl>
-    <PackageIcon>VpnHood.png</PackageIcon>
+    <PackageIcon>Resources\YetiVPN.png</PackageIcon>
     <LangVersion>9.0</LangVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <PackageId>VpnHood.Client.App.Win</PackageId>
@@ -48,7 +48,7 @@
     <None Update="WinDivert64.sys">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="..\VpnHood.png" Link="Resources\VpnHood.png">
+    <None Include="..\YetiVPN.png" Link="Resources\YetiVPN.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>

@@ -47,12 +47,14 @@
 /*----------------------Define Color----------------------*/
 
 :root {
+    --white: #ffffff;
     --dark-blue: #122272;
-    --light-blue: #1940b0;
+    --light-blue: #0f75bd;
     --sky-blue: #16a3fe;
     --master-green: #23c99d;
     --muted-color: rgba(255, 255, 255, 0.2);
     --light-gray: #929292;
+    --dark-gray: #555555;
     --connected-glare: green;
 }
 
@@ -73,8 +75,9 @@ h1, h2, h3 {
 #sectionWrapper {
     min-height: 100vh;
     font-family: 'Arial-Narow';
-    color: white;
-    background-image: linear-gradient(var(--light-blue), var(--dark-blue));
+    color: var(--dark-gray);
+    /* background-image: linear-gradient(var(--light-blue), var(--dark-blue)); */
+    background-color: white;
 }
 
 #sectionWrapperBkgnd {
@@ -84,8 +87,8 @@ h1, h2, h3 {
     bottom: 0;
     left: 0;
     right: 0;
-    background: url("../images/body-bg.png") no-repeat top center;
-    background-size: cover;
+    /* background: url("../images/body-bg.png") no-repeat top center; */
+    /* background-size: cover; */
 }
 
 .main-button {
@@ -94,8 +97,10 @@ h1, h2, h3 {
     color: white !important;
     height: 55px !important;
     width: 250px;
-    background-image: linear-gradient(to right, var(--sky-blue), var(--master-green));
+    background: var(--light-blue) !important;
+    /* background-image: linear-gradient(to right, var(--sky-blue), var(--master-green)); */
     transition: all 0.4s ease;
+    border-radius: 100px; 
 }
 
 #disconnectButton {
@@ -145,7 +150,7 @@ h1, h2, h3 {
     bottom: 0;
     left: 0;
     right: 0;
-    border: 2px white solid;
+    border: 2px red solid;
     border-radius: 50%;
     transition: all 1.5s ease;
 }
@@ -197,10 +202,10 @@ h1, h2, h3 {
 .state-connected #circleOuter:before {
     /* border-color: var(--master-green); */
     border-width: 0px;
-    box-shadow: inset 0 0 30px #fff, /* inner white */
+    box-shadow: inset 0 0 30px red, /* inner white */
     inset 10px 0 50px var(--connected-glare), /* inner left magenta short */
     inset -10px 0 50px var(--connected-glare), /* inner right cyan broad */
-    0 0 50px #fff, /* outer white */
+    0 0 50px red, /* outer white */
     -10px 0 30px var(--connected-glare), /* outer left magenta */
     10px 0 30px var(--connected-glare);
     /* outer right cyan */
@@ -211,8 +216,8 @@ h1, h2, h3 {
 /*--------------------Home Bottom Section--------------------*/
 
 #configSection {
-    border: 2px rgba(22, 163, 254, 0.3) solid;
-    border-radius: 10px;
+    /* border: 2px rgba(22, 163, 254, 0.3) solid; */
+    /* border-radius: 10px; */
     font-family: 'Arial Narrow', Arial, sans-serif;
     font-size: 14px;
     margin-bottom: 1px;
@@ -235,7 +240,7 @@ h1, h2, h3 {
 .speedUnit {
     margin-left: 5px;
     margin-right: 5px;
-    color: gray;
+    color: red;
 }
 
 .config-label {
@@ -275,13 +280,13 @@ h1, h2, h3 {
 
 @media only screen and (max-width: 425px) {
     #sectionWrapper:before {
-        background-image: url("../images/body-bg-mobile.png");
+        /* background-image: url("../images/body-bg-mobile.png"); */
     }
     #middleSection {
         transform: scale(0.8);
     }
     #logo img {
-        max-width: 60px;
+        max-width: 270px;
     }
     h1, h2, h3 {
         font-family: 'Arial-Narow-Bold';

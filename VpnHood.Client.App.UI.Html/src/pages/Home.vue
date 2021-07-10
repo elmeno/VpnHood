@@ -37,15 +37,18 @@
 
         <!-- top bar -->
         <v-col cols="3" class="pa-0 ma-0">
-          <v-app-bar-nav-icon
+          <!-- <v-app-bar-nav-icon
             color="white"
             @click.stop="store.navigationDrawer = !store.navigationDrawer"
-          ></v-app-bar-nav-icon>
+          ></v-app-bar-nav-icon> -->
         </v-col>
-        <v-col cols="6" id="logo" class="text-center pb-0">
-          <img src="@/assets/images/logo-small.png" :alt="$t('appName')" />
-          <h1 class="">{{ $t("appName") }}</h1>
+        <v-col cols="6" id="topstate" class="text-center pb-0">
+          <span id="stateText">{{ store.connectionStateText("$") }}</span>
         </v-col>
+        <!-- <v-col cols="6" id="logo" class="text-center pb-0"> -->
+          <!-- <img src="@/assets/images/logo-small.png" :alt="$t('appName')" /> -->
+          <!-- <h1 class="">{{ $t("appName") }}</h1> -->
+        <!-- </v-col> -->
         <v-col cols="3" class="text-right pa-0 ma-0">
           <!-- Menu -->
           <ClientProfileMenu
@@ -82,10 +85,10 @@
         :class="`state-${connectionState.toLowerCase()} align-self-center`"
       >
         <v-col cols="12" class="ma-0 pa-0" align="center">
-          <div id="circleOuter" class="mb-8">
-            <div id="circle">
-              <div id="circleContent" class="align-center">
-                <span id="stateText">{{ store.connectionStateText("$") }}</span>
+          <!-- <div id="circleOuter" class="mb-8"> -->
+            <!-- <div id="circle"> -->
+              <!-- <div id="circleContent" class="align-center"> -->
+                
 
                 <!-- usage -->
                 <div
@@ -100,40 +103,35 @@
                 </div>
 
                 <!-- check -->
-                <v-icon
-                  class="state-icon"
-                  v-if="
-                    connectionState == 'Connected' && !this.bandwidthUsage()
-                  "
-                  size="90"
-                  color="white"
-                  >check</v-icon
-                >
 
-                <v-icon
-                  class="state-icon"
-                  v-if="connectionState == 'None'"
-                  size="90"
-                  color="white"
-                  >power_off</v-icon
-                >
-                <v-icon
-                  class="state-icon"
-                  v-else-if="connectionState == 'Connecting'"
-                  size="90"
-                  color="white"
-                  >power</v-icon
-                >
-                <v-icon
-                  class="state-icon"
-                  v-else-if="connectionState == 'Diagnosing'"
-                  size="90"
-                  color="white"
-                  >network_check</v-icon
-                >
-              </div>
-            </div>
-          </div>
+                <div cols="6" id="logo" class="text-center pb-0">
+                  <img 
+                    src="@/assets/shield2.png" 
+                    :alt="store.connectionStateText('$')" 
+                    v-if="
+                      connectionState == 'Connected' && !this.bandwidthUsage()
+                  "/>
+                </div>
+                <div cols="6" id="logo" class="text-center pb-0">
+                  <img 
+                    src="@/assets/shieldPrepare.png" 
+                    :alt="store.connectionStateText('$')" 
+                    v-if="
+                    connectionState === 'Connecting' ||
+                    connectionState === 'Disconnecting' ||
+                    connectionState === 'Diagnosing'
+                  "/>
+                </div>
+                <div cols="6" id="logo" class="text-center pb-0">
+                  <img 
+                    src="@/assets/shieldOffline2.png" 
+                    :alt="store.connectionStateText('$')" 
+                    v-if="connectionState == 'None'"
+                  />
+                </div>
+              <!-- </div> -->
+            <!-- </div> -->
+          <!-- </div> -->
 
           <!-- Connect Button -->
           <v-btn
@@ -197,7 +195,7 @@
         </v-col>
 
         <!-- *** Protocol *** -->
-        <v-col cols="12" class="py-1">
+        <!-- <v-col cols="12" class="py-1">
           <v-icon class="config-icon" @click="showProtocolSheet()"
             >settings_ethernet</v-icon
           >
@@ -210,19 +208,20 @@
           <span class="config" @click="showProtocolSheet()">
             {{ protocolStatus }}</span
           >
-        </v-col>
+        </v-col> -->
 
         <!-- *** server *** -->
-        <v-col cols="12" class="py-1">
-          <v-icon class="config-icon" @click="showServersSheet()">dns</v-icon>
+        <v-col cols="12" class="py-1 selectedServer" @click="showServersSheet()">
+          <!-- <v-icon class="config-icon" @click="showServersSheet()">dns</v-icon>
           <span class="config-label" @click="showServersSheet()">{{
             $t("selectedServer")
-          }}</span>
-          <v-icon class="config-arrow" flat @click="showServersSheet()"
-            >keyboard_arrow_right</v-icon
-          >
+          }}</span> -->
+          <country-flag :country='store.clientProfile.countryCode("$")' size='normal'/>
           <span class="config" @click="showServersSheet()">
             {{ store.clientProfile.name("$") }}</span
+          >
+          <v-icon class="config-arrow" flat 
+            >keyboard_arrow_down</v-icon
           >
         </v-col>
       </v-row>
@@ -234,6 +233,19 @@
 <style>
 @import "../assets/styles/custom.css";
 
+.selectedServer {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.selectedServer .config {
+  font-size: 20px;
+  margin: 0 10px;
+}
+.selectedServer .config-arrow {
+    font-size: 30px;
+}
 .v-input--checkbox .v-label {
   font-size: 12px;
 }

@@ -1,19 +1,19 @@
-import firebase from "firebase/app";
-import "firebase/storage";
+import firebase from 'firebase/app'
+import 'firebase/storage'
 
-var firebaseConfig = {
-  apiKey: "AIzaSyB2Br41jN32DmXyH-HqdcsOXVnaGON1ay0",
-  authDomain: "client-d2460.firebaseapp.com",
-  databaseURL: "https://client-d2460.firebaseio.com",
-  projectId: "client-d2460",
-  storageBucket: "client-d2460.appspot.com",
-  messagingSenderId: "216585339900",
-  appId: "1:216585339900:web:17299300c94bfddc172879",
-  measurementId: "G-8JZG8V0NXM"
-};
+const firebaseConfig = {
+  apiKey: 'AIzaSyAJLLevesi1uwo52RVXFC7w8waW80QoNCg',
+  authDomain: 'yetivpn-pc.firebaseapp.com',
+  projectId: 'yetivpn-pc',
+  storageBucket: 'yetivpn-pc.appspot.com',
+  messagingSenderId: '950157896343',
+  appId: '1:950157896343:web:f25dac83f8cb7a41ae97d2',
+  measurementId: 'G-08WLL1FYJ1'
+}
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig)
+// firebase.analytics()
 
 // firebase.auth().signInAnonymously()
 //   .then(() => {

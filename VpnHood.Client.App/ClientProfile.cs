@@ -1,4 +1,5 @@
 ﻿using System;
+using VpnHood.Common;
 
 namespace VpnHood.Client.App
 {
@@ -7,5 +8,6 @@ namespace VpnHood.Client.App
         public string Name { get; set; }
         public Guid ClientProfileId { get; set; }
         public Guid TokenId { get; set; }
+        public Token Token { get; set; }
     }
 }

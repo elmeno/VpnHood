@@ -61,7 +61,7 @@ namespace VpnHood.Client.App.UI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to VpnHood.
+        ///   Looks up a localized string similar to Yeti VPN.
         /// </summary>
         public static string AppName {
             get {

@@ -14,11 +14,11 @@
         <v-toolbar-title class="pl-0">
           {{ $t("servers") }}
         </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn text rounded color="#23c99d" @click="showAddServerSheet">
+        <!-- <v-spacer></v-spacer> -->
+        <!-- <v-btn text rounded color="#16a3fe" @click="showAddServerSheet">
           <v-icon class="mx-2">add_circle</v-icon>
           {{ $t("addServer") }}
-        </v-btn>
+        </v-btn> -->
       </v-toolbar>
 
       <v-card-text class="">
@@ -30,39 +30,36 @@
             class="my-4 rounded-lg py-2 server-item"
             :style="
               store.clientProfile.isDefault(item.id)
-                ? 'border-style: solid; border-color:#23c99d'
+                ? 'border-style: solid; border-color:#16a3fe'
                 : ''
             "
             v-for="(item, i) in store.clientProfileItems"
             :key="i"
           >
-            <v-list-item-icon class="mr-3" v-if="store.clientProfile.isDefault(item.id)">
-              <v-icon
-                size="30"
-                class="active-icon"
-                >done_all</v-icon
-              >
+            <v-list-item-icon class="mr-3"> 
+               <!-- v-if="store.clientProfile.isDefault(item.id)"> -->
+               <country-flag :country='store.clientProfile.countryCode(item.id) || "us"' size='normal'/>
             </v-list-item-icon>
 
             <v-list-item-content>
               <v-list-item-title
-                class="font-weight-bold mb-2"
+                class="font-weight-bold"
                 v-text="store.clientProfile.name(item.id)"
               />
-              <v-list-item-subtitle
+              <!-- <v-list-item-subtitle
                 v-text="
                   store.clientProfile.ip(item.clientProfile.clientProfileId)
                 "
-              />
+              /> -->
             </v-list-item-content>
 
             <v-list-item-action>
               <!-- Menu -->
-              <ContextMenu
+              <!-- <ContextMenu
                 :clientProfileId="item.clientProfile.clientProfileId"
                 :showAddServerItem="false"
                 :showManageServerItem="false"
-              />
+              /> -->
             </v-list-item-action>
           </v-list-item>
         </v-list>
@@ -74,7 +71,7 @@
 <style scoped>
 .server-item {
   box-shadow: 0 1px 2px 1px rgb(0 0 0 / 15%);
-  background-color: #eceffb;
+  /* background-color: #eceffb; */
 }
 
 .active-icon {
@@ -89,18 +86,18 @@
   top: 50%;
   margin-top: -10px;
   margin-left: -5px;
-  background-color: #23c99d66;
+  background-color: #16a3fe66;
   border-radius: 50%;
 }
 </style>
 
 <script>
-import ContextMenu from "../components/ClientProfileMenu";
+// import ContextMenu from "../components/ClientProfileMenu";
 
 export default {
   name: 'ServersPage',
   components: {
-    ContextMenu
+    // ContextMenu
   },
   created() {
     this.isRouterBusy = false;

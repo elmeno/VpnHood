@@ -14,7 +14,7 @@ dotnet = programFiles + "\dotnet\dotnet.exe"
 ' *** install
 launcher = "dotnet"
 action = "runas"
-file =  oFso.BuildPath(curDir, "VpnHoodClient.dll") 
+file =  oFso.BuildPath(curDir, "YetiVPNClient.dll") 
 fileDQ = chr(34) & file & chr(34)
 
 If oFso.FileExists(file) Then

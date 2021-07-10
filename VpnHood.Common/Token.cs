@@ -20,6 +20,9 @@ namespace VpnHood.Common
         
         [JsonPropertyName("tid")]
         public Guid TokenId { get; set; }
+
+        [JsonPropertyName("countryCode")]
+        public string CountryCode { get; set; }
         
         [JsonPropertyName("sec")]
         public byte[] Secret { get; set; }
