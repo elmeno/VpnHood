@@ -2,7 +2,7 @@
   <v-app>
     <AddServerSheet />
     <ClientProfileSheet />
-    <ErrorSheet />
+    <!-- <ErrorSheet /> -->
     <ServersSheet />
     <ProtocolSheet />
     <AppFilterSheet v-if="this.$route.query.appFilter != null" />
@@ -31,7 +31,7 @@ html {
 
 <script>
 import Navigation from "./components/Navigation";
-import ErrorSheet from "./pages/ErrorSheet";
+// import ErrorSheet from "./pages/ErrorSheet";
 import AddServerSheet from "./pages/AddServerSheet";
 import ClientProfileSheet from "./pages/ClientProfileSheet";
 import ProtocolSheet from "./pages/ProtocolSheet";
@@ -43,7 +43,7 @@ export default {
 
   components: {
     Navigation,
-    ErrorSheet,
+    // ErrorSheet,
     AddServerSheet,
     ClientProfileSheet,
     ServersSheet,

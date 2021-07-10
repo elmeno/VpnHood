@@ -311,9 +311,9 @@ namespace VpnHood.Client.App
             VhLogger.Instance.LogInformation($"OS: {Device.OperatingSystemInfo}");
             VhLogger.Instance.LogInformation($"UserAgent: {userAgent}");
 
-            // get token
-            var token = ClientProfileStore.GetToken(ActiveClientProfile.TokenId, true, true);
-            VhLogger.Instance.LogInformation($"TokenId: {VhLogger.FormatId(token.TokenId)}, SupportId: {VhLogger.FormatId(token.SupportId)}, ServerEndPoint: {VhLogger.FormatDns(token.ServerEndPoint)}");
+      // get token
+      var token = ActiveClientProfile.Token;
+      VhLogger.Instance.LogInformation($"TokenId: {VhLogger.FormatId(token.TokenId)}, SupportId: {VhLogger.FormatId(token.SupportId)}, ServerEndPoint: {VhLogger.FormatDns(token.ServerEndPoint)}");
 
             // Create Client
             _clientConnect = new VpnHoodConnect(

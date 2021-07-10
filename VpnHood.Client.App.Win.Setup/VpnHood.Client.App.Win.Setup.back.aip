@@ -25,7 +25,7 @@
     <ROW Property="ProductCode" Value="1033:{40C1EFAD-2B62-4706-B906-BF72DC7E9377} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="VpnHood"/>
-    <ROW Property="ProductVersion" Value="1.1.242.0" Type="32" TargetFile="VpnHoodClient.dll"/>
+    <ROW Property="ProductVersion" Value="1.1.242.0" Type="32" TargetFile="YetiVPNClient.dll"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND;AI_SETUPEXEPATH;SETUPEXEDIR"/>
     <ROW Property="UpgradeCode" Value="{38FCFAB0-A40C-4840-A9F9-B7A06A5BC552}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -89,7 +89,7 @@
     <ROW Component="VpnHood.Common.dll" ComponentId="{A0BA7F8E-5A11-4F6C-9139-6B7A6F898694}" Directory_="APPDIR" Attributes="0" KeyPath="VpnHood.Common.dll"/>
     <ROW Component="VpnHood.Tunneling.dll_1" ComponentId="{D3FAE90D-B3C5-4958-A543-130F25C6E196}" Directory_="APPDIR" Attributes="0" KeyPath="VpnHood.Tunneling.dll_1"/>
     <ROW Component="VpnHoodClient.deps.json" ComponentId="{E2DDB1EC-9611-4645-8C18-38DA85981DA0}" Directory_="APPDIR" Attributes="0" KeyPath="VpnHoodClient.deps.json" Type="0"/>
-    <ROW Component="VpnHoodClient.dll" ComponentId="{FCD99759-1EB2-4359-B3BA-C97B32CE22D6}" Directory_="APPDIR" Attributes="0" KeyPath="VpnHoodClient.dll"/>
+    <ROW Component="YetiVPNClient.dll" ComponentId="{FCD99759-1EB2-4359-B3BA-C97B32CE22D6}" Directory_="APPDIR" Attributes="0" KeyPath="YetiVPNClient.dll"/>
     <ROW Component="VpnHoodClient.exe_1" ComponentId="{A2567253-8009-4669-92BF-B363BA9BD160}" Directory_="APPDIR" Attributes="256" KeyPath="VpnHoodClient.exe_1"/>
     <ROW Component="WOW6432Node" ComponentId="{DA1CE9A4-04ED-417D-A1AC-721CCB6B247E}" Directory_="APPDIR" Attributes="260" KeyPath="WOW6432Node"/>
     <ROW Component="WebView2" ComponentId="{B23BF71B-DE8D-4C20-B873-9B74BF3B3F7D}" Directory_="WebView2_Dir" Attributes="0"/>
@@ -144,7 +144,7 @@
     <ROW File="VpnHood.Tunneling.dll_1" Component_="VpnHood.Tunneling.dll_1" FileName="VPNHOO~7.DLL|VpnHood.Tunneling.dll" Attributes="0" SourcePath="..\VpnHood.Client.App.Win\bin\Release\publish\VpnHood.Tunneling.dll" SelfReg="false"/>
     <ROW File="VpnHood.Tunneling.pdb_1" Component_="VpnHood.Tunneling.dll_1" FileName="VPNHOO~7.PDB|VpnHood.Tunneling.pdb" Attributes="0" SourcePath="..\VpnHood.Client.App.Win\bin\Release\publish\VpnHood.Tunneling.pdb" SelfReg="false"/>
     <ROW File="VpnHoodClient.deps.json" Component_="VpnHoodClient.deps.json" FileName="VPNHOO~1.JSO|VpnHoodClient.deps.json" Attributes="0" SourcePath="..\VpnHood.Client.App.Win\bin\Release\publish\VpnHoodClient.deps.json" SelfReg="false"/>
-    <ROW File="VpnHoodClient.dll" Component_="VpnHoodClient.dll" FileName="VPNHOO~8.DLL|VpnHoodClient.dll" Attributes="0" SourcePath="..\VpnHood.Client.App.Win\bin\Release\publish\VpnHoodClient.dll" SelfReg="false"/>
+    <ROW File="YetiVPNClient.dll" Component_="YetiVPNClient.dll" FileName="VPNHOO~8.DLL|YetiVPNClient.dll" Attributes="0" SourcePath="..\VpnHood.Client.App.Win\bin\Release\publish\YetiVPNClient.dll" SelfReg="false"/>
     <ROW File="VpnHoodClient.exe_1" Component_="VpnHoodClient.exe_1" FileName="VPNHOO~1.EXE|VpnHoodClient.exe" Attributes="0" SourcePath="..\VpnHood.Client.App.Win\bin\Release\publish\VpnHoodClient.exe" SelfReg="false" DigSign="true"/>
     <ROW File="VpnHoodClient.pdb" Component_="VpnHoodClient.exe_1" FileName="VPNHOO~8.PDB|VpnHoodClient.pdb" Attributes="0" SourcePath="..\VpnHood.Client.App.Win\bin\Release\publish\VpnHoodClient.pdb" SelfReg="false"/>
     <ROW File="VpnHoodClient.runtimeconfig.json" Component_="VpnHoodClient.deps.json" FileName="VPNHOO~2.JSO|VpnHoodClient.runtimeconfig.json" Attributes="0" SourcePath="..\VpnHood.Client.App.Win\bin\Release\publish\VpnHoodClient.runtimeconfig.json" SelfReg="false"/>
@@ -385,7 +385,7 @@
     <ROW Feature_="MainFeature" Component_="VpnHood.Client.dll"/>
     <ROW Feature_="MainFeature" Component_="VpnHood.Common.dll"/>
     <ROW Feature_="MainFeature" Component_="VpnHood.Tunneling.dll_1"/>
-    <ROW Feature_="MainFeature" Component_="VpnHoodClient.dll"/>
+    <ROW Feature_="MainFeature" Component_="YetiVPNClient.dll"/>
     <ROW Feature_="MainFeature" Component_="VpnHoodClient.exe_1"/>
     <ROW Feature_="MainFeature" Component_="Path"/>
   </COMPONENT>

@@ -33,7 +33,7 @@ namespace VpnHood.Client.App
                 ClientSize = DefWindowSize,
                 Visible = false,
                 ShowInTaskbar = false,
-                Icon = Resource.VpnHoodIcon,
+                Icon = Resource.YetiVPNIcon,
                 StartPosition = FormStartPosition.Manual,
                 FormBorderStyle = FormBorderStyle.None
             };

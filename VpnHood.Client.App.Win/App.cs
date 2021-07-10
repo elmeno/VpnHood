@@ -201,7 +201,7 @@ namespace VpnHood.Client.App
         {
             _notifyIcon = new NotifyIcon
             {
-                Icon = Resource.VpnHoodIcon
+                Icon = Resource.YetiVPNIcon
             };
             _notifyIcon.MouseClick += (sender, e) =>
             {
@@ -283,7 +283,7 @@ namespace VpnHood.Client.App
                 return;
 
             VhLogger.Instance.LogInformation($"Configuring Windows Defender Firewall...");
-            var ruleName = "VpnHood";
+            var ruleName = "YetiVPN";
 
             //dotnet exe
             var exePath = FindExePath("dotnet.exe");
