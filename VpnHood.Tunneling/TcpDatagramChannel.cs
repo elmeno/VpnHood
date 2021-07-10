@@ -1,22 +1,24 @@
 ﻿using Microsoft.Extensions.Logging;
 using PacketDotNet;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using VpnHood.Logging;
 
 namespace VpnHood.Tunneling
 {
     public class TcpDatagramChannel : IDatagramChannel
     {
-        private TcpClientStream _tcpClientStream;
-        private Thread _thread;
+        private readonly TcpClientStream _tcpClientStream;
         private readonly int _mtu = 0xFFFF;
         private readonly byte[] _buffer = new byte[0xFFFF];
+        private readonly object _sendLock = new();
 
         public event EventHandler OnFinished;
-        public event EventHandler<ChannelPacketArrivalEventArgs> OnPacketReceived;
+        public event EventHandler<ChannelPacketReceivedEventArgs> OnPacketReceived;
         public bool Connected { get; private set; }
         public long SentByteCount { get; private set; }
         public long ReceivedByteCount { get; private set; }
@@ -29,18 +31,17 @@ namespace VpnHood.Tunneling
 
         public void Start()
         {
-            if (_thread != null)
+            if (Connected)
                 throw new Exception("Start has already been called!");
 
             if (_disposed)
                 throw new ObjectDisposedException(nameof(TcpDatagramChannel));
 
             Connected = true;
-            _thread = new Thread(ReadThread, TunnelUtil.SocketStackSize_Stream); //256K
-            _thread.Start();
+            _ = ReadTask();
         }
 
-        private void ReadThread(object obj)
+        private async Task ReadTask()
         {
             var tcpClient = _tcpClientStream.TcpClient;
             var stream = _tcpClientStream.Stream;
@@ -50,12 +51,12 @@ namespace VpnHood.Tunneling
                 var streamPacketReader = new StreamPacketReader(stream);
                 while (tcpClient.Connected)
                 {
-                    var ipPackets = streamPacketReader.Read();
-                    if (ipPackets.Length == 0 || _disposed)
+                    var ipPackets = await streamPacketReader.ReadAsync();
+                    if (ipPackets == null || _disposed)
                         break;
 
                     ReceivedByteCount += ipPackets.Sum(x => x.TotalPacketLength);
-                    OnPacketReceived?.Invoke(this, new ChannelPacketArrivalEventArgs(ipPackets, this));
+                    FireReceivedPackets(ipPackets);
                 }
             }
             catch
@@ -68,8 +69,22 @@ namespace VpnHood.Tunneling
             }
         }
 
-        private readonly object _sendLock = new();
-        public void SendPackets(IPPacket[] ipPackets)
+        private void FireReceivedPackets(IEnumerable<IPPacket> ipPackets)
+        {
+            if (_disposed)
+                return;
+
+            try
+            {
+                OnPacketReceived?.Invoke(this, new ChannelPacketReceivedEventArgs(ipPackets, this));
+            }
+            catch (Exception ex)
+            {
+                VhLogger.Instance.Log(LogLevel.Warning, GeneralEventId.Udp, $"Error in processing received packets! Error: {ex.Message}");
+            }
+        }
+
+        public void SendPacket(IEnumerable<IPPacket> ipPackets)
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(TcpDatagramChannel));
@@ -103,7 +118,6 @@ namespace VpnHood.Tunneling
 
             Connected = false;
             _tcpClientStream.Dispose();
-            _tcpClientStream = null;
         }
     }
 }

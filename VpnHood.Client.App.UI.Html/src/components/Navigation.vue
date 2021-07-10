@@ -22,19 +22,20 @@
         </v-list-item-content>
       </v-list-item>
 
-      <!-- darkMode -->
-      <!-- <v-divider></v-divider>
-      <v-list-item>
+      <v-divider></v-divider>
+      <!-- News -->
+      <v-list-item
+        href="https://github.com/vpnhood/VpnHood/blob/main/CHANGELOG.md"
+        target="_blank"
+      >
         <v-list-item-action>
-          <v-icon>nights_stay</v-icon>
+          <v-icon>campaign</v-icon>
         </v-list-item-action>
         <v-list-item-content>
-          {{ $t("darkMode") }}
-          <v-switch v-model="darkMode" reverse class="ml-8"></v-switch>
+          <v-list-item-title>{{ this.$t("changelog") }}</v-list-item-title>
         </v-list-item-content>
-      </v-list-item> -->
+      </v-list-item>
 
-      <v-divider></v-divider>
       <!-- Feedback -->
       <v-list-item
         href="https://docs.google.com/forms/d/e/1FAIpQLSd5AQesTSbDo23_4CkNiKmSPtPBaZIuFjAFnjqLo6XGKG5gyg/viewform?usp=sf_link"

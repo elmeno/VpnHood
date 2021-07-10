@@ -12,20 +12,22 @@ namespace VpnHood.Tunneling
 
         public NatItemEx(IPPacket ipPacket) : base(ipPacket)
         {
+            if (ipPacket is null) throw new ArgumentNullException(nameof(ipPacket));
+
             DestinationAddress = ipPacket.DestinationAddress;
 
             switch (ipPacket.Protocol)
             {
                 case ProtocolType.Tcp:
                     {
-                        var tcpPacket = ipPacket.Extract<TcpPacket>();
+                        var tcpPacket = PacketUtil.ExtractTcp(ipPacket);
                         DestinationPort = tcpPacket.DestinationPort;
                         break;
                     }
 
                 case ProtocolType.Udp:
                     {
-                        var udpPacket = ipPacket.Extract<UdpPacket>();
+                        var udpPacket = PacketUtil.ExtractUdp(ipPacket);
                         DestinationPort = udpPacket.DestinationPort;
                         break;
                     }
