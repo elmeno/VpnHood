@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace VpnHood.Tunneling
 {
@@ -20,12 +19,7 @@ namespace VpnHood.Tunneling
             _stream = stream;
         }
 
-
-        /// <summary>
-        /// The return refrence will be changed on next call! Consider to call ToArray in async usage
-        /// </summary>
-        /// <returns>null if nothing read</returns>
-        public async Task<IEnumerable<IPPacket>> ReadAsync()
+        public IPPacket[] Read()
         {
             _ipPackets.Clear();
 
@@ -33,7 +27,7 @@ namespace VpnHood.Tunneling
             while (moreData)
             {
                 var toRead = _buffer.Length - _bufferCount;
-                var read = await _stream.ReadAsync(_buffer, _bufferCount, toRead);
+                var read = _stream.Read(_buffer, _bufferCount, toRead);
                 _bufferCount += read;
                 moreData = toRead == read && read != 0;
 
@@ -45,7 +39,7 @@ namespace VpnHood.Tunneling
                     if (packetLength < IPv4Packet.HeaderMinimumLength)
                         throw new Exception($"A packet with invalid length has been received! Length: {packetLength}");
 
-                    // read all packets
+                    // read all packet
                     if (_bufferCount - bufferIndex < packetLength)
                         break;
                     var segment = new ByteArraySegment(_buffer, bufferIndex, packetLength);
@@ -65,7 +59,7 @@ namespace VpnHood.Tunneling
                     moreData = false;
             }
 
-            return _ipPackets.Count != 0 ? _ipPackets : null;
+            return _ipPackets.ToArray();
         }
     }
 }

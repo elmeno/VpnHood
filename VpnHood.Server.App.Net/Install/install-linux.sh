@@ -1,6 +1,4 @@
 #!/bin/bash
-packageFile=$1;
-
 echo "Installation script for linux";
 read -p "Install .NET Runtime 5.0 for ubuntu/20.10 (y/n)?" install_net;
 read -p "Auto Start (y/n)?" autostart;
@@ -31,11 +29,8 @@ echo "Installing unzip...";
 apt install unzip
 
 # download & install VpnHoodServer
-if [ "$packageFile" = "" ]; then
-	echo "Downloading VpnHoodServer...";
-	packageFile="VpnHoodServer.zip";
-	wget -O $packageFile $installUrl;
-fi
+echo "Downloading VpnHoodServer...";
+wget -O VpnHoodServer.zip $installUrl;
 
 echo "Stop VpnHoodServer if exists...";
 systemctl stop VpnHoodServer.service;
@@ -45,7 +40,6 @@ mkdir -p $destinationPath;
 unzip -o VpnHoodServer.zip -d $destinationPath;
 rm VpnHoodServer.zip
 
-# init service
 if [ "$autostart" = "y" ]; then
 	echo "creating autostart service. Name: VpnHoodService...";
 	service="
@@ -55,10 +49,10 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=sh -c \"dotnet '/opt/VpnHoodServer/launcher/run.dll' -launcher:noLaunchAfterUpdate && sleep 10s\"
+ExecStart=dotnet '/opt/VpnHoodServer/launcher/run.dll' -launcher:noLaunchAfterUpdate
 TimeoutStartSec=0
 Restart=always
-RestartSec=2
+RestartSec=5
 
 [Install]
 WantedBy=default.target

@@ -6,7 +6,6 @@ using VpnHood.Tunneling;
 using VpnHood.Tunneling.Messages;
 using System.Security.Cryptography;
 using System.Linq;
-using System.IO;
 
 namespace VpnHood.Server
 {
@@ -45,7 +44,7 @@ namespace VpnHood.Server
             _pingProxy.OnPacketReceived += PingProxy_OnPacketReceived;
             AccessController = accessController;
             ClientIdentity = clientIdentity;
-            SessionId = new Random().Next();
+            SessionId = TunnelUtil.RandomInt();
             Timeout = timeout;
             Tunnel = new Tunnel();
             Tunnel.OnPacketReceived += Tunnel_OnPacketReceived;
@@ -96,54 +95,49 @@ namespace VpnHood.Server
             }
         }
 
-        private void Tunnel_OnPacketReceived(object sender, ChannelPacketReceivedEventArgs e)
+        private void Tunnel_OnPacketReceived(object sender, ChannelPacketArrivalEventArgs e)
         {
             foreach (var ipPacket in e.IpPackets)
-                ProcessPacket(ipPacket);
+                if (ipPacket is IPv4Packet ipv4Packet)
+                    ProcessPacket(ipv4Packet);
         }
 
-        private void ProcessPacket(IPPacket ipPacket)
+        private void ProcessPacket(IPv4Packet ipPacket)
         {
-            if (ipPacket is null) throw new ArgumentNullException(nameof(ipPacket));
-            if (ipPacket.Version != IPVersion.IPv4) throw new Exception($"{ipPacket.Version} packets is not supported!");
-
-            if (ipPacket.Protocol == ProtocolType.Udp)
+            if (ipPacket.Protocol == PacketDotNet.ProtocolType.Udp)
                 ProcessUdpPacket(ipPacket);
 
-            else if (ipPacket.Protocol == ProtocolType.Icmp)
+            else if (ipPacket.Protocol == PacketDotNet.ProtocolType.Icmp)
                 ProcessIcmpPacket(ipPacket);
 
-            else if (ipPacket.Protocol == ProtocolType.Tcp)
+            else if (ipPacket.Protocol == PacketDotNet.ProtocolType.Tcp)
                 throw new Exception("Tcp Packet should not be sent through this channel! Use TcpProxy.");
 
             else
                 throw new Exception($"{ipPacket.Protocol} is not supported yet!");
         }
 
-        private void ProcessUdpPacket(IPPacket ipPacket)
+        private void ProcessUdpPacket(IPv4Packet ipPacket)
         {
-            if (ipPacket is null) throw new ArgumentNullException(nameof(ipPacket));
-
             // drop blocke packets
             if (_blockList.Any(x => x.Equals(ipPacket.DestinationAddress)))
                 return;
 
             // send packet via proxy
             var natItem = _nat.Get(ipPacket);
-            if (natItem?.Tag is not UdpProxy udpProxy || udpProxy.IsDisposed)
+            if (natItem?.Tag is not UdpProxy udpProxy)
             {
-                var udpPacket = PacketUtil.ExtractUdp(ipPacket);
+                var udpPacket = ipPacket.Extract<UdpPacket>();
                 udpProxy = new UdpProxy(_udpClientFactory, new IPEndPoint(ipPacket.SourceAddress, udpPacket.SourcePort));
                 udpProxy.OnPacketReceived += UdpProxy_OnPacketReceived;
-                natItem = _nat.Add(ipPacket, (ushort)udpProxy.LocalPort, true);
+                natItem = _nat.Add(ipPacket, (ushort)udpProxy.LocalPort);
                 natItem.Tag = udpProxy;
             }
             udpProxy.Send(ipPacket);
         }
 
-        private void ProcessIcmpPacket(IPPacket ipPacket)
+        private void ProcessIcmpPacket(IPv4Packet ipPacket)
         {
-            if (ipPacket is null) throw new ArgumentNullException(nameof(ipPacket));
             _pingProxy.Send(ipPacket);
         }
 
@@ -211,19 +205,16 @@ namespace VpnHood.Server
         public void Dispose()
         {
             if (IsDisposed) return;
-            IsDisposed = true; 
 
             var _ = AccessController.Sync();
             Tunnel.OnPacketReceived -= Tunnel_OnPacketReceived;
             Tunnel.OnTrafficChanged -= Tunnel_OnTrafficChanged;
-            Tunnel.Dispose();
-
             _pingProxy.OnPacketReceived -= PingProxy_OnPacketReceived;
 
+            IsDisposed = true; // mark disposed here
+            Tunnel.Dispose();
             _pingProxy.Dispose();
-
             _nat.Dispose();
-            _nat.OnNatItemRemoved -= Nat_OnNatItemRemoved; //must be after dispose
         }
     }
 }

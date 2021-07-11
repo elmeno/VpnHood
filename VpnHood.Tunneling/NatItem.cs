@@ -17,8 +17,6 @@ namespace VpnHood.Tunneling
 
         public NatItem(IPPacket ipPacket)
         {
-            if (ipPacket is null) throw new ArgumentNullException(nameof(ipPacket));
-
             SourceAddress = ipPacket.SourceAddress;
             Protocol = ipPacket.Protocol;
             AccessTime = DateTime.Now;
@@ -27,14 +25,14 @@ namespace VpnHood.Tunneling
             {
                 case ProtocolType.Tcp:
                     {
-                        var tcpPacket = PacketUtil.ExtractTcp(ipPacket);
+                        var tcpPacket = ipPacket.Extract<TcpPacket>();
                         SourcePort = tcpPacket.SourcePort;
                         break;
                     }
 
                 case ProtocolType.Udp:
                     {
-                        var udpPacket = PacketUtil.ExtractUdp(ipPacket);
+                        var udpPacket = ipPacket.Extract<UdpPacket>();
                         SourcePort = udpPacket.SourcePort;
                         break;
                     }
@@ -55,7 +53,7 @@ namespace VpnHood.Tunneling
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0066:Convert switch statement to expression", Justification = "<Pending>")]
         private static ushort GetIcmpId(IPPacket ipPacket)
         {
-            var icmpPacket = PacketUtil.ExtractIcmp(ipPacket);
+            var icmpPacket = ipPacket.Extract<IcmpV4Packet>();
             var type = (int)icmpPacket.TypeCode >> 8;
             switch (type)
             {

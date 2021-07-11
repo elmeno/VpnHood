@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">VpnHood!</string>
-    <string name="disconnect">Disconnect</string>
+    <string name="app_name">VpnHood</string>
     <string name="action_settings">Settings</string>
 </resources>

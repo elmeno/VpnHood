@@ -146,7 +146,6 @@ namespace VpnHood.App.Launcher
                 if (IsUpdateAvailableOffline)
                 {
                     _logger.LogInformation($"New update available!");
-                    Thread.Sleep(3000);
                     ExitAndLaunchUpdater();
                 }
             }
@@ -206,10 +205,7 @@ namespace VpnHood.App.Launcher
         }
         private static int CompareTragetFramework(string targetFramework1, string targetFramework2)
         {
-            if (string.IsNullOrWhiteSpace(targetFramework1) || string.IsNullOrWhiteSpace(targetFramework2))
-                return -1;
-
-             var t1 = Version.Parse(Regex.Replace(targetFramework1, "[^0-9.]", ""));
+            var t1 = Version.Parse(Regex.Replace(targetFramework1, "[^0-9.]", ""));
             var t2 = Version.Parse(Regex.Replace(targetFramework2, "[^0-9.]", "")); ;
             var tt1 = new Version(t1.Major, t1.Minor);
             var tt2 = new Version(t2.Major, t2.Minor);
@@ -246,23 +242,19 @@ namespace VpnHood.App.Launcher
                 // copy launcher to temp folder and run with update command
                 var tempLaunchFolder = Path.Combine(Path.GetTempPath(), "VpnHood.Launcher");
                 var tempLauncherFilePath = Path.Combine(tempLaunchFolder, "run.dll");
-                _logger.LogInformation($"Preparing updater. {tempLaunchFolder}");
                 if (Directory.Exists(tempLaunchFolder)) Directory.Delete(tempLaunchFolder, true);
                 DirectoryCopy(Path.GetDirectoryName(typeof(Updater).Assembly.Location), tempLaunchFolder, true);
 
                 // dotnet tempdir/launcher.dll update package.zip appFolder orgArguments
                 var args = new string[] { tempLauncherFilePath, "update", packageFile, AppFolder };
-                _logger.LogInformation($"Running updater: {tempLauncherFilePath}");
                 Process.Start("dotnet", args.Concat(Environment.GetCommandLineArgs()));
 
                 // cancel current process
                 _cancellationTokenSource.Cancel();
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogWarning($"Error during update! Message: {ex}");
-
-                // delete new package file if there is an error
+                // delete new package file if there is an erro
                 if (File.Exists(packageFile))
                     File.Delete(packageFile);
                 throw;
@@ -277,7 +269,7 @@ namespace VpnHood.App.Launcher
 
         private int Launch()
         {
-            _logger.LogInformation($"\nLaunching VpnHood Server!\n");
+            _logger.LogInformation($"\nLaunching the latest version!\n");
 
             // create processStartInfo
             var processStartInfo = new ProcessStartInfo()
@@ -317,11 +309,8 @@ namespace VpnHood.App.Launcher
             }
             catch (OperationCanceledException)
             {
-                _logger.LogWarning($"launcher is killing server!");
                 process.Kill(true);
-
-                // must return zero otherwise let linux service will kill the updater
-                return 0; 
+                return -2;
             }
         }
 

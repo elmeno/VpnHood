@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using VpnHood.Logging;
 
 namespace VpnHood.Tunneling
 {
@@ -18,6 +17,7 @@ namespace VpnHood.Tunneling
         private DateTime _lastCleanupTime = DateTime.Now;
         bool _disposed = false;
 
+        private ILogger Logger => Logging.VhLogger.Instance;
         public NatItem[] Items => _map.Select(x => x.Value).ToArray();
         public event EventHandler<NatEventArgs> OnNatItemRemoved;
 
@@ -54,7 +54,7 @@ namespace VpnHood.Tunneling
             _mapR.Remove(natItem, out _);
             _map.Remove((natItem.Protocol, natItem.NatId), out _);
 
-            VhLogger.Instance.LogTrace(GeneralEventId.Nat, $"NatItem has been removed. {natItem}");
+            Logger.LogTrace(GeneralEventId.Nat, $"NatItem has been removed. {natItem}");
             OnNatItemRemoved?.Invoke(this, new NatEventArgs(natItem));
         }
 
@@ -105,21 +105,22 @@ namespace VpnHood.Tunneling
 
         public NatItem GetOrAdd(IPPacket ipPacket)
         {
-            return Get(ipPacket) ?? Add(ipPacket, false);
+            return Get(ipPacket) ?? Add(ipPacket);
         }
 
-        public NatItem Add(IPPacket ipPacket, bool overwrite = false)
+
+        public NatItem Add(IPPacket ipPacket)
         {
             if (_disposed) throw new ObjectDisposedException(typeof(Nat).Name);
 
             lock (_lockObject)
             {
                 var natId = GetFreeNatId(ipPacket.Protocol);
-                return Add(ipPacket, natId, overwrite);
+                return Add(ipPacket, natId);
             }
         }
 
-        public NatItem Add(IPPacket ipPacket, ushort natId, bool overwrite = false)
+        public NatItem Add(IPPacket ipPacket, ushort natId)
         {
             if (_disposed) throw new ObjectDisposedException(typeof(Nat).Name);
 
@@ -130,23 +131,12 @@ namespace VpnHood.Tunneling
                 // try to find previous mapping
                 var natItem = CreateNatItemFromPacket(ipPacket);
                 natItem.NatId = natId;
-                try
-                {
-                    _map.Add((natItem.Protocol, natItem.NatId), natItem);
-                    _mapR.Add(natItem, natItem); //sound crazy! because GetHashCode and Equals don't incluse all members
-                }
-                catch (ArgumentException) when (overwrite)
-                {
-                    Remove(natItem);
-                    _map.Add((natItem.Protocol, natItem.NatId), natItem);
-                    _mapR.Add(natItem, natItem); //sound crazy! because GetHashCode and Equals don't incluse all members
-                }
-
-                VhLogger.Instance.LogTrace(GeneralEventId.Nat, $"New NAT record. {natItem}");
+                _map.Add((natItem.Protocol, natItem.NatId), natItem);
+                _mapR.Add(natItem, natItem); //sound crazy! because GetHashCode and Equals don't incluse all members
+                Logger.LogTrace(GeneralEventId.Nat, $"New NAT record. {natItem}");
                 return natItem;
             }
         }
-
 
         /// <returns>null if not found</returns>
         public NatItem Resolve(ProtocolType protocol, ushort id)
@@ -168,6 +158,36 @@ namespace VpnHood.Tunneling
                 natItem.AccessTime = DateTime.Now;
                 return natItem;
             }
+        }
+
+        public static IPPacket BuildTcpResetPacket(IPAddress sourceAddress, ushort sourcePort, IPAddress destinationAddress, ushort destinationPort, TcpPacket tcpPacket2)
+        {
+            TcpPacket tcpPacket = new(sourcePort, destinationPort)
+            {
+                Reset = true,
+            };
+
+            // set sequenceNumber and acknowledgmentNumber 
+            if (tcpPacket2.Acknowledgment)
+            {
+                tcpPacket.AcknowledgmentNumber = tcpPacket2.AcknowledgmentNumber;
+            }
+            else // not sure
+            {
+                tcpPacket.Acknowledgment = true;
+                tcpPacket.AcknowledgmentNumber = tcpPacket2.SequenceNumber + (ushort)tcpPacket2.BytesSegment.Length;
+            }
+
+            IPv4Packet ipPacket = new(sourceAddress, destinationAddress)
+            {
+                Protocol = ProtocolType.Tcp,
+                PayloadPacket = tcpPacket
+            };
+            tcpPacket.UpdateTcpChecksum();
+            tcpPacket.UpdateCalculatedValues();
+            ipPacket.UpdateIPChecksum();
+            ipPacket.UpdateCalculatedValues();
+            return ipPacket;
         }
 
         public void Dispose()

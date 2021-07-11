@@ -6,11 +6,9 @@
       fluid
       :class="`px-4 pt-4 px-sm-8 pt-sm-5 state-${connectionState.toLowerCase()}`"
     >
-      <v-snackbar top app color="success" v-model="store.newServerAdded">{{
-        $t("newServerAdded")
-      }}</v-snackbar>
+      <v-snackbar top app color="success" v-model="store.newServerAdded">{{$t("newServerAdded")}}</v-snackbar>
+
       <v-row class="align-self-start">
-        <!-- Public Server Hint -->
         <v-dialog
           :value="store.requestedPublicServerProfileId != null"
           width="500"
@@ -37,23 +35,22 @@
           </v-card>
         </v-dialog>
 
-        <!-- AppBar -->
-        <v-app-bar color="transparent" dark elevation="0">
-          <v-app-bar-nav-icon
+        <!-- top bar -->
+        <v-col cols="3" class="pa-0 ma-0">
+          <!-- <v-app-bar-nav-icon
+            color="white"
             @click.stop="store.navigationDrawer = !store.navigationDrawer"
-          />
-          <v-img
-            v-if="0"
-            class="mx-2"
-            src="@/assets/images/logo-small.png"
-            :alt="$t('appName')"
-            max-height="20"
-            max-width="20"
-          ></v-img>
-          <v-toolbar-title class="app-title">{{
-            $t("appName")
-          }}</v-toolbar-title>
-          <v-spacer></v-spacer>
+          ></v-app-bar-nav-icon> -->
+        </v-col>
+        <v-col cols="6" id="topstate" class="text-center pb-0">
+          <span id="stateText">{{ store.connectionStateText("$") }}</span>
+        </v-col>
+        <!-- <v-col cols="6" id="logo" class="text-center pb-0"> -->
+          <!-- <img src="@/assets/images/logo-small.png" :alt="$t('appName')" /> -->
+          <!-- <h1 class="">{{ $t("appName") }}</h1> -->
+        <!-- </v-col> -->
+        <v-col cols="3" class="text-right pa-0 ma-0">
+          <!-- Menu -->
           <ClientProfileMenu
             clientProfileId="$"
             color="white"
@@ -61,7 +58,7 @@
             :showDeleteItem="false"
             :showRenameItem="false"
           />
-        </v-app-bar>
+        </v-col>
       </v-row>
 
       <!-- Speed -->
@@ -88,10 +85,10 @@
         :class="`state-${connectionState.toLowerCase()} align-self-center`"
       >
         <v-col cols="12" class="ma-0 pa-0" align="center">
-          <div id="circleOuter" class="mb-8">
-            <div id="circle">
-              <div id="circleContent" class="align-center">
-                <span id="stateText">{{ store.connectionStateText("$") }}</span>
+          <!-- <div id="circleOuter" class="mb-8"> -->
+            <!-- <div id="circle"> -->
+              <!-- <div id="circleContent" class="align-center"> -->
+                
 
                 <!-- usage -->
                 <div
@@ -106,40 +103,35 @@
                 </div>
 
                 <!-- check -->
-                <v-icon
-                  class="state-icon"
-                  v-if="
-                    connectionState == 'Connected' && !this.bandwidthUsage()
-                  "
-                  size="90"
-                  color="white"
-                  >check</v-icon
-                >
 
-                <v-icon
-                  class="state-icon"
-                  v-if="connectionState == 'None'"
-                  size="90"
-                  color="white"
-                  >power_off</v-icon
-                >
-                <v-icon
-                  class="state-icon"
-                  v-else-if="connectionState == 'Connecting'"
-                  size="90"
-                  color="white"
-                  >power</v-icon
-                >
-                <v-icon
-                  class="state-icon"
-                  v-else-if="connectionState == 'Diagnosing'"
-                  size="90"
-                  color="white"
-                  >network_check</v-icon
-                >
-              </div>
-            </div>
-          </div>
+                <div cols="6" id="logo" class="text-center pb-0">
+                  <img 
+                    src="@/assets/shield2.png" 
+                    :alt="store.connectionStateText('$')" 
+                    v-if="
+                      connectionState == 'Connected' && !this.bandwidthUsage()
+                  "/>
+                </div>
+                <div cols="6" id="logo" class="text-center pb-0">
+                  <img 
+                    src="@/assets/shieldPrepare.png" 
+                    :alt="store.connectionStateText('$')" 
+                    v-if="
+                    connectionState === 'Connecting' ||
+                    connectionState === 'Disconnecting' ||
+                    connectionState === 'Diagnosing'
+                  "/>
+                </div>
+                <div cols="6" id="logo" class="text-center pb-0">
+                  <img 
+                    src="@/assets/shieldOffline2.png" 
+                    :alt="store.connectionStateText('$')" 
+                    v-if="connectionState == 'None'"
+                  />
+                </div>
+              <!-- </div> -->
+            <!-- </div> -->
+          <!-- </div> -->
 
           <!-- Connect Button -->
           <v-btn
@@ -179,42 +171,15 @@
 
       <!-- Config -->
       <v-row id="configSection" class="align-self-end">
-        <!-- *** ipFilter *** -->
-        <v-col
-          cols="12"
-          class="py-1"
-          v-if="
-            store.features.isExcludeIpsSupported ||
-            store.features.isIncludeIpsSupported ||
-            true
-          "
-        >
-          <!-- todo: remove true -->
-          <v-icon class="config-icon" @click="showIpFilterSheet()"
-            >public</v-icon
-          >
-          <span class="config-label" @click="showIpFilterSheet()">{{
-            $t("ipFilterStatus_title")
-          }}</span>
-          <v-icon class="config-arrow" flat @click="showIpFilterSheet()"
-            >keyboard_arrow_right</v-icon
-          >
-          <span class="config" @click="showIpFilterSheet()">
-            {{ this.ipFilterStatus }}</span
-          >
-        </v-col>
-
         <!-- *** appFilter *** -->
         <v-col
           cols="12"
           class="py-1"
           v-if="
-            store.features.isExcludeAppsSupported ||
-            store.features.isIncludeAppsSupported ||
-            true
+            store.features.isExcludeApplicationsSupported ||
+            store.features.isIncludeApplicationsSupported
           "
         >
-          <!-- todo: remove true -->
           <v-icon class="config-icon" @click="showAppFilterSheet()"
             >apps</v-icon
           >
@@ -230,7 +195,7 @@
         </v-col>
 
         <!-- *** Protocol *** -->
-        <v-col cols="12" class="py-1">
+        <!-- <v-col cols="12" class="py-1">
           <v-icon class="config-icon" @click="showProtocolSheet()"
             >settings_ethernet</v-icon
           >
@@ -243,19 +208,20 @@
           <span class="config" @click="showProtocolSheet()">
             {{ protocolStatus }}</span
           >
-        </v-col>
+        </v-col> -->
 
         <!-- *** server *** -->
-        <v-col cols="12" class="py-1">
-          <v-icon class="config-icon" @click="showServersSheet()">dns</v-icon>
+        <v-col cols="12" class="py-1 selectedServer" @click="showServersSheet()">
+          <!-- <v-icon class="config-icon" @click="showServersSheet()">dns</v-icon>
           <span class="config-label" @click="showServersSheet()">{{
             $t("selectedServer")
-          }}</span>
-          <v-icon class="config-arrow" flat @click="showServersSheet()"
-            >keyboard_arrow_right</v-icon
-          >
+          }}</span> -->
+          <country-flag :country='store.clientProfile.countryCode("$")' size='normal'/>
           <span class="config" @click="showServersSheet()">
             {{ store.clientProfile.name("$") }}</span
+          >
+          <v-icon class="config-arrow" flat 
+            >keyboard_arrow_down</v-icon
           >
         </v-col>
       </v-row>
@@ -267,6 +233,19 @@
 <style>
 @import "../assets/styles/custom.css";
 
+.selectedServer {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.selectedServer .config {
+  font-size: 20px;
+  margin: 0 10px;
+}
+.selectedServer .config-arrow {
+    font-size: 30px;
+}
 .v-input--checkbox .v-label {
   font-size: 12px;
 }
@@ -297,20 +276,9 @@ export default {
   computed: {
     connectionState() { return this.store.connectionState("$"); },
     appFilterStatus() {
-      let appFilters = this.store.userSettings.appFilters;
-      if (!appFilters) appFilters = [];
-
-      if (this.store.userSettings.appFiltersMode == 'Exclude') return this.$t("appFilterStatus_exclude", { x: appFilters.length });
-      if (this.store.userSettings.appFiltersMode == 'Include') return this.$t("appFilterStatus_include", { x: appFilters.length });
+      if (this.store.userSettings.appFiltersMode == 'Exclude') return this.$t("appFilterStatus_exclude", { x: this.store.userSettings.appFilters.length });
+      if (this.store.userSettings.appFiltersMode == 'Include') return this.$t("appFilterStatus_include", { x: this.store.userSettings.appFilters.length });
       return this.$t("appFilterStatus_all");
-    },
-    ipFilterStatus() {
-      let ipGroupFilters = this.store.userSettings.ipGroupFilters;
-      if (!ipGroupFilters) ipGroupFilters = [];
-      
-      if (this.store.userSettings.ipGroupFiltersMode == 'Exclude') return this.$t("ipFilterStatus_exclude", { x: ipGroupFilters.length });
-      if (this.store.userSettings.ipGroupFiltersMode == 'Include') return this.$t("ipFilterStatus_include", { x: ipGroupFilters.length });
-      return this.$t("ipFilterStatus_all");
     },
     protocolStatus() {
       return (this.store.userSettings.useUdpChannel) ? this.$t('protocol_udpOn') : this.$t('protocol_udpOff');
@@ -349,12 +317,7 @@ export default {
 
     showAppFilterSheet() {
       window.gtag('event', "changeAppFilter");
-      this.$router.push({ path: this.$route.path, query: { ... this.$route.query, appfilter: '1' } })
-    },
-
-    showIpFilterSheet() {
-      window.gtag('event', "changeIpFilter");
-      this.$router.push({ path: this.$route.path, query: { ... this.$route.query, ipfilter: '1' } })
+      this.$router.push({ path: this.$route.path, query: { ... this.$route.query, appFilter: '1' } })
     },
 
     bandwidthUsage() {

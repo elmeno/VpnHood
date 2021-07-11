@@ -2,7 +2,7 @@
 using PacketDotNet;
 using SharpPcap.WinDivert;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -14,7 +14,8 @@ namespace VpnHood.Client.Device.WinDivert
 {
     public class WinDivertPacketCapture : IPacketCapture
     {
-        private IpNetwork[] _includeNetworks;
+        private IPNetwork[] _excludeNetworks;
+        private IPNetwork[] _includeNetworks;
         private WinDivertHeader _lastCaptureHeader;
 
         protected readonly SharpPcap.WinDivert.WinDivertDevice _device;
@@ -66,7 +67,6 @@ namespace VpnHood.Client.Device.WinDivert
             var rawPacket = e.GetPacket();
             var packet = Packet.ParsePacket(rawPacket.LinkLayerType, rawPacket.Data);
             var ipPacket = packet.Extract<IPPacket>();
-
             _lastCaptureHeader = (WinDivertHeader)e.Header;
             ProcessPacket(ipPacket);
         }
@@ -89,7 +89,7 @@ namespace VpnHood.Client.Device.WinDivert
             _device.Dispose();
         }
 
-        public void SendPacketToInbound(IEnumerable<IPPacket> ipPackets)
+        public void SendPacketToInbound(IPPacket[] ipPackets)
         {
             foreach (var ipPacket in ipPackets)
                 SendPacket(ipPacket, false);
@@ -104,22 +104,35 @@ namespace VpnHood.Client.Device.WinDivert
 
         public IPAddress[] RouteAddresses { get; set; }
 
-        public IpNetwork[] IncludeNetworks
+        public bool IsExcludeNetworksSupported => true;
+        public bool IsIncludeNetworksSupported => true;
+
+        public IPNetwork[] ExcludeNetworks
+        {
+            get => _excludeNetworks;
+            set
+            {
+                if (Started)
+                    throw new InvalidOperationException($"Can't set {nameof(ExcludeNetworks)} when {nameof(WinDivertPacketCapture)} is started!");
+                _excludeNetworks = value;
+            }
+        }
+
+        public IPNetwork[] IncludeNetworks
         {
             get => _includeNetworks;
             set
             {
-                if (Started)
-                    throw new InvalidOperationException($"Can't set {nameof(IncludeNetworks)} when {nameof(WinDivertPacketCapture)} is started!");
+                if (Started) throw new InvalidOperationException($"Can't set {nameof(IncludeNetworks)} when {nameof(WinDivertPacketCapture)} is started!");
                 _includeNetworks = value;
             }
         }
 
         #region Applications Filter
-        public bool IsExcludeAppsSupported => false;
-        public bool IsIncludeAppsSupported => false;
-        public string[] ExcludeApps { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
-        public string[] IncludeApps { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public bool IsExcludeApplicationsSupported => false;
+        public bool IsIncludeApplicationsSupported => false;
+        public string[] ExcludeApplications { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public string[] IncludeApplications { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
 
         public bool IsMtuSupported => false;
         public int Mtu { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
@@ -130,18 +143,22 @@ namespace VpnHood.Client.Device.WinDivert
             if (Started)
                 throw new InvalidOperationException("Device has been already started!");
 
-            // create include and exclude phrases
-            var phraseX = "true";
-            if (IncludeNetworks != null)
+            // add outbound; filter loopback
+            var filter = "ip and outbound and !loopback";
+
+            if (IncludeNetworks != null && IncludeNetworks.Length > 0)
             {
-                var ipRanges = IpNetwork.ToIpRange(IncludeNetworks);
-                var phrases = ipRanges.Select(x => $"(ip.DstAddr>={x.FirstIpAddress} and ip.DstAddr<={x.LastIpAddress})").ToArray();
+                var phrases = IncludeNetworks.Select(x => $"(ip.DstAddr>={x.FirstAddress} and ip.DstAddr<={x.LastAddress})").ToArray();
                 var phrase = string.Join(" or ", phrases);
-                phraseX += $" and ({phrase})";
+                filter += $" and (udp.DstPort==53 or ({phrase}))";
+            }
+            if (ExcludeNetworks != null && ExcludeNetworks.Length > 0)
+            {
+                var phrases = ExcludeNetworks.Select(x => $"(ip.DstAddr<{x.FirstAddress} or ip.DstAddr>{x.LastAddress})");
+                var phrase = string.Join(" and ", phrases);
+                filter += $" and (udp.DstPort==53 or ({phrase}))";
             }
 
-            // add outbound; filter loopback
-            var filter = $"ip and outbound and !loopback and (udp.DstPort==53 or ({phraseX}))";
             try
             {
                 _device.Filter = filter;
@@ -154,6 +171,7 @@ namespace VpnHood.Client.Device.WinDivert
                     throw new Exception("Access denied! Could not open WinDivert driver! Make sure the app is running with admin privilege.", ex);
                 throw;
             }
+
         }
 
         public void StopCapture()
@@ -165,13 +183,8 @@ namespace VpnHood.Client.Device.WinDivert
             OnStopped?.Invoke(this, EventArgs.Empty);
         }
 
-        public bool IsPassthruSupported => true;
-
-        public bool IsDnsServersSupported => false;
-
-        public IPAddress[] DnsServers { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
-
-        public bool IsProtectSocketSuported => false;
-        public void ProtectSocket(System.Net.Sockets.Socket socket) => throw new NotSupportedException($"{nameof(ProcessPacket)} is not supported by {nameof(WinDivertDevice)}");
+        public void ProtectSocket(System.Net.Sockets.Socket socket)
+        {
+        }
     }
 }

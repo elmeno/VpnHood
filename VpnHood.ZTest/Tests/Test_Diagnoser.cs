@@ -11,7 +11,7 @@ namespace VpnHood.Test
     {
 
         [TestMethod]
-        public void NormalConnect_NoInternet()
+        public void Test_NormalConnect_NoInternet()
         {
             // create server
             using var server = TestHelper.CreateServer();

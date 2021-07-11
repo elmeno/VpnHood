@@ -3,18 +3,17 @@ using PacketDotNet;
 using PacketDotNet.Utils;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 using VpnHood.Logging;
 
 namespace VpnHood.Tunneling
 {
     public class UdpChannel : IDatagramChannel
     {
+        private Thread _thread;
         private IPEndPoint _lastRemoteEp;
         private readonly UdpClient _udpClient;
         private readonly int _mtuWithFragmentation = TunnelUtil.MtuWithFragmentation;
@@ -26,12 +25,9 @@ namespace VpnHood.Tunneling
         private readonly IPAddress _selfEchoAddress = IPAddress.Parse("0.0.0.0");
         private readonly byte[] _selfEchoPayload = new byte[1200];
         private readonly byte[] _buffer = new byte[0xFFFF];
-        private bool _disposed = false;
-        private bool _finishInvoked;
-        private readonly object _lockCleanup = new();
 
         public event EventHandler OnFinished;
-        public event EventHandler<ChannelPacketReceivedEventArgs> OnPacketReceived;
+        public event EventHandler<ChannelPacketArrivalEventArgs> OnPacketReceived;
         public event EventHandler OnSelfEchoReply;
 
         public byte[] Key { get; private set; }
@@ -60,21 +56,22 @@ namespace VpnHood.Tunneling
 
             //tunnel manages fragmentation; we just need to send it as possible
             udpClient.DontFragment = false;
+            Connected = true;
         }
 
         public void Start()
         {
+            if (_thread != null)
+                throw new Exception("Start has already been called!");
+
             if (_disposed)
                 throw new ObjectDisposedException(nameof(TcpDatagramChannel));
 
-            if (Connected)
-                throw new Exception("Start has already been called!");
-
-            Connected = true;
-            _ = ReadTask();
+            _thread = new Thread(ReadThread, TunnelUtil.SocketStackSize_Datagram);
+            _thread.Start();
         }
 
-        private async Task ReadTask()
+        private void ReadThread(object obj)
         {
             var ipPackets = new List<IPPacket>();
 
@@ -83,27 +80,22 @@ namespace VpnHood.Tunneling
             {
                 try
                 {
-                    var udpResult = await _udpClient.ReceiveAsync();
-                    _lastRemoteEp = udpResult.RemoteEndPoint;
-                    var buffer = udpResult.Buffer;
+                    var buffer = _udpClient.Receive(ref _lastRemoteEp);
+                    ReceivedByteCount += buffer.Length;
 
                     // decrypt buffer
                     var bufferIndex = 0;
                     if (_isClient)
                     {
-                        var cryptoPos = BitConverter.ToInt64(buffer, bufferIndex);
-                        bufferIndex += 8;
+                        var cryptoPos = BitConverter.ToInt64(buffer, 0);
+                        bufferIndex = 8;
                         _bufferCryptor.Cipher(buffer, bufferIndex, buffer.Length, cryptoPos);
                     }
                     else
                     {
-                        var sessionId = BitConverter.ToInt32(buffer, bufferIndex);
-                        bufferIndex += 4;
-                        if (sessionId != _sessionId)
-                            throw new InvalidDataException("Invalid sessionId");
-
-                        var cryptoPos = BitConverter.ToInt64(buffer, bufferIndex);
-                        bufferIndex += 8;
+                        var sessionId = BitConverter.ToInt32(buffer, 0);
+                        var cryptoPos = BitConverter.ToInt64(buffer, 4);
+                        bufferIndex = 12;
                         _bufferCryptor.Cipher(buffer, bufferIndex, buffer.Length, cryptoPos);
                     }
 
@@ -111,7 +103,6 @@ namespace VpnHood.Tunneling
                     while (bufferIndex < buffer.Length)
                     {
                         var ipPacket = PacketUtil.ReadNextPacket(buffer, ref bufferIndex);
-                        ReceivedByteCount += ipPacket.TotalPacketLength;
 
                         // check SelfEcho
                         //if (ipPacket.Protocol == PacketDotNet.ProtocolType.Icmp)
@@ -126,42 +117,28 @@ namespace VpnHood.Tunneling
                 catch (Exception ex)
                 {
                     VhLogger.Instance.Log(LogLevel.Warning, GeneralEventId.Udp, $"Error in receiving packets! Error: {ex.Message}");
-                    if (IsInvalidState(ex))
-                        Finish();
                 }
 
                 // send collected packets when there is no more packets in the UdpClient buffer
                 if (!_disposed && _udpClient.Available == 0)
                 {
-                    FireReceivedPackets(ipPackets);
+                    FireReceivedPackets(ipPackets.ToArray());
                     ipPackets.Clear();
                 }
-            }
-
-            Finish();
-        }
-
-        private void Finish()
-        {
-            lock (_lockCleanup)
-            {
-                if (_finishInvoked)
-                    return;
-                _finishInvoked = true;
             }
 
             Dispose();
             OnFinished?.Invoke(this, EventArgs.Empty);
         }
 
-        private void FireReceivedPackets(IEnumerable<IPPacket> ipPackets)
+        private void FireReceivedPackets(IPPacket[] ipPackets)
         {
             if (_disposed)
                 return;
 
             try
             {
-                OnPacketReceived?.Invoke(this, new ChannelPacketReceivedEventArgs(ipPackets, this));
+                OnPacketReceived?.Invoke(this, new ChannelPacketArrivalEventArgs(ipPackets.ToArray(), this));
             }
             catch (Exception ex)
             {
@@ -177,7 +154,7 @@ namespace VpnHood.Tunneling
             var t = ipPacket.SourceAddress;
             ipPacket.SourceAddress = ipPacket.DestinationAddress;
             ipPacket.DestinationAddress = t;
-            SendPacket(new[] { ipPacket });
+            SendPackets(new[] { ipPacket });
             return true;
         }
 
@@ -187,8 +164,8 @@ namespace VpnHood.Tunneling
                 return false;
 
             // extract time
-            var icmpPacket = PacketUtil.ExtractIcmp(ipPacket);
-            var buffer = icmpPacket.PayloadData;
+            var icmpV4Packet = ipPacket.Extract<IcmpV4Packet>();
+            var buffer = icmpV4Packet.PayloadData;
             if (buffer.Length < _selfEchoPayload.Length)
                 return false; //invalid size
 
@@ -214,16 +191,14 @@ namespace VpnHood.Tunneling
                 buffer[i] = 1;
             BitConverter.GetBytes(DateTime.UtcNow.ToBinary()).CopyTo(buffer, 0);
             var byteArraySegment = new ByteArraySegment(buffer);
-            var icmpPacket = new IcmpV4Packet(byteArraySegment);
-            ipPacket.ParentPacket = icmpPacket;
-            PacketUtil.UpdateIpPacket(ipPacket);
+            var icmpPacket = new IcmpV4Packet(byteArraySegment, ipPacket);
 
             // send packet
-            SendPacket(new[] { ipPacket });
+            SendPackets(new[] { icmpPacket.Extract<IPPacket>() });
         }
 
         private readonly object _sendLock = new();
-        public void SendPacket(IEnumerable<IPPacket> ipPackets)
+        public void SendPackets(IPPacket[] ipPackets)
         {
             if (_disposed)
                 throw new ObjectDisposedException(nameof(TcpDatagramChannel));
@@ -282,17 +257,11 @@ namespace VpnHood.Tunneling
             catch (Exception ex)
             {
                 VhLogger.Instance.Log(LogLevel.Error, GeneralEventId.Udp, $"{VhLogger.FormatTypeName(this)}: Could not send {bufferCount} packets! Message: {ex.Message}");
-                if (IsInvalidState(ex))
-                    Finish();
                 return 0;
             }
         }
 
-        private bool IsInvalidState(Exception ex) =>
-            _disposed ||
-            (ex is ObjectDisposedException ||
-            (ex is SocketException socketException && socketException.SocketErrorCode == SocketError.InvalidArgument));
-
+        private bool _disposed = false;
         public void Dispose()
         {
             if (_disposed) return;

@@ -21,6 +21,8 @@ namespace VpnHood.Client
 {
     public class VpnHoodClient : IDisposable
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
+        private ILogger _logger => VhLogger.Instance;
         private readonly IPacketCapture _packetCapture;
         private readonly bool _leavePacketCaptureOpen;
         private TcpProxyHost _tcpProxyHost;
@@ -28,10 +30,8 @@ namespace VpnHood.Client
         private readonly int _minTcpDatagramChannelCount;
         private bool _disposed;
         private bool _isManagaingDatagramChannels;
+        private DateTime _lastIntervalCheckTime = DateTime.MinValue;
         private DateTime? _lastConnectionErrorTime = null;
-        private Timer _intervalCheckTimer;
-        private readonly List<IPPacket> _ipPackets = new();
-        private readonly HashSet<IPAddress> _includeIps = new();
 
         internal Nat Nat { get; }
         internal Tunnel Tunnel { get; private set; }
@@ -43,17 +43,15 @@ namespace VpnHood.Client
         public string ServerId { get; private set; }
         public bool Connected { get; private set; }
         public IPAddress TcpProxyLoopbackAddress { get; }
-        public IPAddress[] DnsServers { get; set; }
+        public IPAddress DnsAddress { get; set; }
         public event EventHandler StateChanged;
-        public SessionStatus SessionStatus { get; private set; } = new SessionStatus();
-        public Version Version { get; }
-        public bool ExcludeLocalNetwork { get; }
+        public SessionStatus SessionStatus { get; private set; }
+        public string Version { get; }
         public long ReceiveSpeed => Tunnel?.ReceiveSpeed ?? 0;
         public long ReceivedByteCount => Tunnel?.ReceivedByteCount ?? 0;
         public long SendSpeed => Tunnel?.SendSpeed ?? 0;
         public long SentByteCount => Tunnel?.SentByteCount ?? 0;
         public bool UseUdpChannel { get; set; }
-        public IpRange[] IncludeIpRanges { get; set; }
 
         public VpnHoodClient(IPacketCapture packetCapture, Guid clientId, Token token, ClientOptions options)
         {
@@ -61,22 +59,15 @@ namespace VpnHood.Client
             _leavePacketCaptureOpen = options.LeavePacketCaptureOpen;
             _minTcpDatagramChannelCount = options.MinTcpDatagramChannelCount;
             Token = token ?? throw new ArgumentNullException(nameof(token));
-            DnsServers = options.DnsServers ?? throw new ArgumentNullException(nameof(options.DnsServers));
-            if (DnsServers.Length == 0) throw new ArgumentException("Atleast one DnsServer must be set!", nameof(options.DnsServers));
+            DnsAddress = options.DnsAddress ?? throw new ArgumentNullException(nameof(options.DnsAddress));
             TcpProxyLoopbackAddress = options.TcpProxyLoopbackAddress ?? throw new ArgumentNullException(nameof(options.TcpProxyLoopbackAddress));
             ClientId = clientId;
             Timeout = options.Timeout;
             Version = options.Version;
-            ExcludeLocalNetwork = options.ExcludeLocalNetwork;
             UseUdpChannel = options.UseUdpChannel;
-            IncludeIpRanges = options.IncludeIpRanges;
             Nat = new Nat(true);
 
             packetCapture.OnStopped += PacketCature_OnStopped;
-
-            // Configure thread pool size
-            // ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
-            // ThreadPool.SetMinThreads(workerThreads * 2, completionPortThreads * 2);
         }
 
         private ClientState _state = ClientState.None;
@@ -87,14 +78,14 @@ namespace VpnHood.Client
             {
                 if (_state == value) return;
                 _state = value;
-                VhLogger.Instance.LogInformation($"Client is {State}");
+                _logger.LogInformation($"Client is {State}");
                 StateChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
         private void PacketCature_OnStopped(object sender, EventArgs e)
         {
-            VhLogger.Instance.LogInformation("Device has been stopped!");
+            _logger.LogInformation("Device has been stopped!");
             Dispose();
         }
 
@@ -111,7 +102,7 @@ namespace VpnHood.Client
                 {
                     try
                     {
-                        VhLogger.Instance.LogInformation($"Resolving IP from host name: {VhLogger.FormatDns(Token.DnsName)}...");
+                        _logger.LogInformation($"Resolving IP from host name: {VhLogger.FormatDns(Token.DnsName)}...");
                         var hostEntry = Dns.GetHostEntry(Token.DnsName);
                         if (hostEntry.AddressList.Length > 0)
                         {
@@ -119,7 +110,7 @@ namespace VpnHood.Client
                             var ip = hostEntry.AddressList[index];
                             var serverEndPoint = Util.ParseIpEndPoint(Token.ServerEndPoint);
 
-                            VhLogger.Instance.LogInformation($"{hostEntry.AddressList.Length} IP founds. {ip}:{serverEndPoint.Port} has been Selected!");
+                            _logger.LogInformation($"{hostEntry.AddressList.Length} IP founds. {ip}:{serverEndPoint.Port} has been Selected!");
                             _serverEndPoint = new IPEndPoint(ip, serverEndPoint.Port);
                             return _serverEndPoint;
                         }
@@ -128,7 +119,7 @@ namespace VpnHood.Client
                 }
                 else
                 {
-                    VhLogger.Instance.LogInformation($"Extracting host from the token. Host: {VhLogger.FormatDns(Token.ServerEndPoint)}");
+                    _logger.LogInformation($"Extracting host from the token. Host: {VhLogger.FormatDns(Token.ServerEndPoint)}");
                     var index = random.Next(0, Token.ServerEndPoints.Length);
                     _serverEndPoint = Util.ParseIpEndPoint(Token.ServerEndPoints[index]);
                     return _serverEndPoint;
@@ -140,18 +131,14 @@ namespace VpnHood.Client
 
         public async Task Connect()
         {
-            _ = VhLogger.Instance.BeginScope("Client");
+            _ = _logger.BeginScope("Client");
             if (_disposed) throw new ObjectDisposedException(nameof(VpnHoodClient));
 
             if (State != ClientState.None)
                 throw new Exception("Connection is already in progress!");
 
-            // report config
-            ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
-            VhLogger.Instance.LogInformation($"MinWorkerThreads: {workerThreads}, CompletionPortThreads: {completionPortThreads}");
-
             // Replace dot in version to prevent anonymous make treat it as ip.
-            VhLogger.Instance.LogInformation($"Client is connecting. Version: {Version}");
+            _logger.LogInformation($"Client is connecting. Version: {Version}");
 
             // Starting
             State = ClientState.Connecting;
@@ -164,84 +151,58 @@ namespace VpnHood.Client
                 // Preparing tunnel
                 Tunnel = new Tunnel();
                 Tunnel.OnPacketReceived += Tunnel_OnPacketReceived;
-                Tunnel.OnChannelRemoved += Tunnel_OnChannelRemoved;
 
                 // Establish first connection and create a session
                 await Task.Run(() => ConnectInternal(_cancellationTokenSource.Token));
 
-                // run interval checker
-                _intervalCheckTimer = new Timer(IntervalCheck, null, 0, 5000);
-
                 // create Tcp Proxy Host
-                VhLogger.Instance.LogTrace($"Creating {VhLogger.FormatTypeName<TcpProxyHost>()}...");
+                _logger.LogTrace($"Creating {VhLogger.FormatTypeName<TcpProxyHost>()}...");
                 _tcpProxyHost = new TcpProxyHost(this, _packetCapture, TcpProxyLoopbackAddress);
                 var _ = _tcpProxyHost.StartListening();
 
                 // Preparing device
                 if (!_packetCapture.Started)
                 {
-                    ConfigPacketFilter();
+                    // Exclude serverEp
+                    if (_packetCapture.IsExcludeNetworksSupported)
+                        _packetCapture.ExcludeNetworks = _packetCapture.ExcludeNetworks != null
+                            ? _packetCapture.ExcludeNetworks.Concat(new IPNetwork[] { new IPNetwork(ServerTcpEndPoint.Address) }).ToArray()
+                            : new IPNetwork[] { new IPNetwork(ServerTcpEndPoint.Address) }.ToArray();
+
+                    _packetCapture.OnPacketArrivalFromInbound += PacketCapture_OnPacketArrivalFromInbound;
                     _packetCapture.StartCapture();
                 }
 
-                _packetCapture.OnPacketArrivalFromInbound += PacketCapture_OnPacketArrivalFromInbound;
                 State = ClientState.Connected;
             }
             catch (Exception ex)
             {
-                VhLogger.Instance.LogError($"Error! {ex}");
-                Dispose(ex);
+                _logger.LogError($"Error! {ex}");
+                Dispose();
                 throw;
             }
         }
 
-        private void ConfigPacketFilter()
+        private void IntervalCheck()
         {
-            // DnsServer
-            if (_packetCapture.IsDnsServersSupported)
-                _packetCapture.DnsServers = DnsServers;
-
-            var excludeNetworks = new List<IpNetwork>();
-            if (ExcludeLocalNetwork)
-                excludeNetworks.AddRange(IpNetwork.LocalNetworks);
-
-            // exclude server if ProtectSocket is not supported to prevent loop back
-            if (!_packetCapture.IsProtectSocketSuported)
-                excludeNetworks.Add(new IpNetwork(ServerTcpEndPoint.Address));
-
-            // clear include networks
-            _packetCapture.IncludeNetworks = new IpNetwork[] { IpNetwork.Parse("0.0.0.0/0") };
-
-            // Exclude serverEp
-            if (excludeNetworks.Count > 0)
+            // check is in progress
+            lock (this)
             {
-                VhLogger.Instance.LogInformation($"Excluding Networks: {string.Join(", ", excludeNetworks.Select(x => $"{x.Prefix}/{x.PrefixLength}"))}");
-                List<IpNetwork> includeNetworks = new(IpNetwork.Invert(excludeNetworks));
-                includeNetworks.Add(new IpNetwork(TcpProxyLoopbackAddress, 32)); //make sure TcpProxyLoop back is added to routes
-                _packetCapture.IncludeNetworks = includeNetworks.ToArray();
+                if ((DateTime.Now - _lastIntervalCheckTime).TotalSeconds < 5)
+                    return;
+                _lastIntervalCheckTime = DateTime.Now;
             }
-        }
 
-        private void Tunnel_OnChannelRemoved(object sender, ChannelEventArgs e)
-        {
-            if (e.Channel is IDatagramChannel)
-                IntervalCheck(null);
-        }
 
-        private void IntervalCheck(object state)
-        {
             var _ = ManageDatagramChannels(_cancellationTokenSource.Token);
         }
 
         // WARNING: Performance Critical!
-        private void Tunnel_OnPacketReceived(object sender, ChannelPacketReceivedEventArgs e)
+        private void Tunnel_OnPacketReceived(object sender, ChannelPacketArrivalEventArgs e)
         {
-            // manually manage DNS reply if DNS does not supported by _packetCapture
-            if (!_packetCapture.IsDnsServersSupported)
-            {
-                foreach (var ipPacket in e.IpPackets)
-                    UpdateDnsRequest(ipPacket, false);
-            }
+            // manage DNS reply
+            foreach (var ipPacket in e.IpPackets)
+                UpdateDnsRequest(ipPacket, false);
 
             // forward packet to device
             _packetCapture.SendPacketToInbound(e.IpPackets);
@@ -250,42 +211,30 @@ namespace VpnHood.Client
         // WARNING: Performance Critical!
         private void PacketCapture_OnPacketArrivalFromInbound(object sender, PacketCaptureArrivalEventArgs e)
         {
-            if (_disposed)
-                return;
-
             try
             {
-                lock (_ipPackets) // this method should not be called in multithread, if so we need to allocate the list per call
+                IntervalCheck();
+
+                var ipPackets = new List<IPPacket>(); //todo cache
+                foreach (var arivalPacket in e.ArivalPackets)
                 {
-                    _ipPackets.Clear(); // prevent reallocation in this intensive event
-                    var ipPackets = _ipPackets;
-                    foreach (var arivalPacket in e.ArivalPackets)
+                    var ipPacket = arivalPacket.IpPacket;
+                    if (_cancellationTokenSource.IsCancellationRequested) return;
+                    if (arivalPacket.IsHandled || ipPacket.Version != IPVersion.IPv4)
+                        continue;
+
+                    // tunnel only Udp and Icmp packets
+                    if (ipPacket.Protocol == PacketDotNet.ProtocolType.Udp || ipPacket.Protocol == PacketDotNet.ProtocolType.Icmp)
                     {
-                        var ipPacket = arivalPacket.IpPacket;
-                        if (_cancellationTokenSource.IsCancellationRequested) return;
-                        if (arivalPacket.IsHandled || ipPacket.Version != IPVersion.IPv4) continue;
-
-                        // check include range
-                        if (arivalPacket.IsPassthruSupported && !IsInIncludeIpRange(ipPacket.DestinationAddress))
-                        {
-                            arivalPacket.Passthru = true;
-                            arivalPacket.IsHandled = true;
-                            continue;
-                        }
-
-                        // tunnel only Udp and Icmp packets
-                        if (ipPacket.Protocol == PacketDotNet.ProtocolType.Udp || ipPacket.Protocol == PacketDotNet.ProtocolType.Icmp)
-                        {
-                            if (!_packetCapture.IsDnsServersSupported)
-                                UpdateDnsRequest(ipPacket, true);
-                            arivalPacket.IsHandled = true;
-                            ipPackets.Add(ipPacket);
-                        }
+                        UpdateDnsRequest(ipPacket, true);
+                        arivalPacket.IsHandled = true;
+                        ipPackets.Add(ipPacket);
                     }
-
-                    if (ipPackets.Count > 0)
-                        Tunnel.SendPacket(ipPackets);
                 }
+
+                if (ipPackets.Count > 0)
+                    Tunnel.SendPacket(ipPackets.ToArray());
+
             }
             catch (Exception ex)
             {
@@ -293,57 +242,45 @@ namespace VpnHood.Client
             }
         }
 
-        private bool IsInIncludeIpRange(IPAddress ipAddress)
-        {
-            // all accepted
-            if (IncludeIpRanges == null)
-                return true;
-
-            // check in cache
-            if (_includeIps.Contains(ipAddress))
-                return true;
-
-            if (IpRange.IsInRange(IncludeIpRanges, ipAddress))
-            {
-                // we really don't need to keep that much ip cache for client
-                if (_includeIps.Count > 0xFFFF) _includeIps.Clear();
-                _includeIps.Add(ipAddress);
-                return true;
-            }
-
-            return false;
-        }
-
         private void UpdateDnsRequest(IPPacket ipPacket, bool outgoing)
         {
-            if (ipPacket is null) throw new ArgumentNullException(nameof(ipPacket));
             if (ipPacket.Protocol != PacketDotNet.ProtocolType.Udp) return;
-            var dnsServer = DnsServers[0]; //use first DNS
 
             // manage DNS outgoing packet if requested DNS is not VPN DNS
-            if (outgoing && !ipPacket.DestinationAddress.Equals(dnsServer))
+            if (outgoing && !ipPacket.DestinationAddress.Equals(DnsAddress))
             {
-                var udpPacket = PacketUtil.ExtractUdp(ipPacket);
+                var udpPacket = ipPacket.Extract<UdpPacket>();
+                if (udpPacket == null) return;
+
                 if (udpPacket.DestinationPort == 53) //53 is DNS port
                 {
-                    VhLogger.Instance.Log(LogLevel.Information, GeneralEventId.Dns, $"DNS request from {VhLogger.Format(ipPacket.SourceAddress)}:{udpPacket.SourcePort} to {VhLogger.Format(ipPacket.DestinationAddress)}, Map to: {VhLogger.Format(dnsServer)}");
+                    _logger.Log(LogLevel.Information, GeneralEventId.Dns, $"DNS request from {VhLogger.Format(ipPacket.SourceAddress)}:{udpPacket.SourcePort} to {VhLogger.Format(ipPacket.DestinationAddress)}, Map to: {VhLogger.Format(DnsAddress)}");
+
                     udpPacket.SourcePort = Nat.GetOrAdd(ipPacket).NatId;
-                    ipPacket.DestinationAddress = dnsServer;
-                    PacketUtil.UpdateIpPacket(ipPacket);
+                    udpPacket.UpdateUdpChecksum();
+                    udpPacket.UpdateCalculatedValues();
+                    ipPacket.DestinationAddress = DnsAddress;
+                    ((IPv4Packet)ipPacket).UpdateIPChecksum();
+                    ipPacket.UpdateCalculatedValues();
                 }
             }
 
             // manage DNS incomming packet from VPN DNS
-            else if (!outgoing && ipPacket.SourceAddress.Equals(dnsServer))
+            else if (!outgoing && ipPacket.SourceAddress.Equals(DnsAddress))
             {
-                var udpPacket = PacketUtil.ExtractUdp(ipPacket);
+                var udpPacket = ipPacket.Extract<UdpPacket>();
+                if (udpPacket == null) return;
+
                 var natItem = (NatItemEx)Nat.Resolve(PacketDotNet.ProtocolType.Udp, udpPacket.DestinationPort);
                 if (natItem != null)
                 {
-                    VhLogger.Instance.Log(LogLevel.Information, GeneralEventId.Dns, $"DNS reply to {VhLogger.Format(natItem.DestinationAddress)}:{natItem.DestinationPort}");
+                    _logger.Log(LogLevel.Information, GeneralEventId.Dns, $"DNS reply to {VhLogger.Format(natItem.DestinationAddress)}:{natItem.DestinationPort}");
                     ipPacket.SourceAddress = natItem.DestinationAddress;
                     udpPacket.DestinationPort = natItem.SourcePort;
-                    PacketUtil.UpdateIpPacket(ipPacket);
+                    udpPacket.UpdateUdpChecksum();
+                    udpPacket.UpdateCalculatedValues();
+                    ((IPv4Packet)ipPacket).UpdateIPChecksum();
+                    ipPacket.UpdateCalculatedValues();
                 }
             }
         }
@@ -404,14 +341,14 @@ namespace VpnHood.Client
                     await Task.WhenAll(tasks).ContinueWith(x =>
                     {
                         if (x.IsFaulted)
-                            VhLogger.Instance.LogError($"Couldn't add a {VhLogger.FormatTypeName<TcpDatagramChannel>()}!", x.Exception);
+                            _logger.LogError($"Couldn't add a {VhLogger.FormatTypeName<TcpDatagramChannel>()}!", x.Exception);
                         _isManagaingDatagramChannels = false;
+
+                        // Close session
+                        if (SessionStatus.ResponseCode != ResponseCode.Ok)
+                            Dispose(); //todo: reset packet!
                     });
                 }
-            }
-            catch (Exception ex)
-            {
-                VhLogger.Instance.LogError(ex.Message);
             }
             finally
             {
@@ -425,11 +362,9 @@ namespace VpnHood.Client
             if (udpKey == null || udpKey.Length == 0) throw new ArgumentNullException(nameof(udpKey));
 
             var udpEndPoint = new IPEndPoint(ServerTcpEndPoint.Address, udpPort);
-            VhLogger.Instance.LogInformation(GeneralEventId.DatagramChannel, $"Creating {VhLogger.FormatTypeName<UdpChannel>()}... ServerEp: {udpEndPoint}");
-
+            _logger.LogInformation(GeneralEventId.DatagramChannel, $"Creating {VhLogger.FormatTypeName<UdpChannel>()}... ServerEp: {udpEndPoint}");
             var udpClient = new UdpClient();
-            if (_packetCapture.IsProtectSocketSuported)
-                _packetCapture.ProtectSocket(udpClient.Client);
+            _packetCapture.ProtectSocket(udpClient.Client);
             udpClient.Connect(udpEndPoint);
             var udpChannel = new UdpChannel(true, udpClient, SessionId, udpKey);
             Tunnel.AddChannel(udpChannel);
@@ -441,27 +376,18 @@ namespace VpnHood.Client
             try
             {
                 // create tcpConnection
-                if (_packetCapture.IsProtectSocketSuported)
-                    _packetCapture.ProtectSocket(tcpClient.Client);
+                _packetCapture.ProtectSocket(tcpClient.Client);
 
                 // Client.Timeout does not affect in ConnectAsync
-                VhLogger.Instance.LogTrace(eventId, $"Connecting to Server: {VhLogger.Format(ServerTcpEndPoint)}...");
+                _logger.LogTrace(eventId, $"Connecting to Server: {VhLogger.Format(ServerTcpEndPoint)}...");
                 await Util.TcpClient_ConnectAsync(tcpClient, ServerTcpEndPoint.Address, ServerTcpEndPoint.Port, Timeout, cancellationToken);
 
                 // start TLS
                 var stream = new SslStream(tcpClient.GetStream(), true, UserCertificateValidationCallback);
 
                 // Establish a TLS connection
-                VhLogger.Instance.LogTrace(eventId, $"TLS Authenticating. HostName: {VhLogger.FormatDns(Token.DnsName)}...");
-                var sslProtocol = Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major < 10
-                    ? System.Security.Authentication.SslProtocols.Tls12 // windows 7
-                    : System.Security.Authentication.SslProtocols.None; //auto
-
-                await stream.AuthenticateAsClientAsync(new SslClientAuthenticationOptions
-                {
-                    TargetHost = Token.DnsName,
-                    EnabledSslProtocols = sslProtocol
-                }, cancellationToken);
+                _logger.LogTrace(eventId, $"TLS Authenticating. HostName: {VhLogger.FormatDns(Token.DnsName)}...");
+                await stream.AuthenticateAsClientAsync(new SslClientAuthenticationOptions { TargetHost = Token.DnsName }, cancellationToken);
 
                 _lastConnectionErrorTime = null;
                 return new TcpClientStream(tcpClient, stream);
@@ -478,8 +404,12 @@ namespace VpnHood.Client
                     _lastConnectionErrorTime = DateTime.Now;
 
                 // dispose client after long waiting socket error
-                if (!_disposed && (DateTime.Now - _lastConnectionErrorTime.Value).TotalMilliseconds > Timeout)
-                    Dispose(ex);
+                if ((DateTime.Now - _lastConnectionErrorTime.Value).TotalMilliseconds > Timeout)
+                {
+                    SessionStatus.ResponseCode = ResponseCode.GeneralError;
+                    SessionStatus.ErrorMessage = ex.Message;
+                    Dispose();
+                }
 
                 throw;
             }
@@ -508,8 +438,7 @@ namespace VpnHood.Client
             // Create the hello Message
             var request = new HelloRequest()
             {
-                ClientVersion = Version.ToString(3),
-                ClientProtocolVersion = 1,
+                ClientVersion = typeof(VpnHoodClient).Assembly.GetName().Version.ToString(3),
                 ClientId = ClientId,
                 TokenId = Token.TokenId,
                 EncryptedClientId = encryptedClientId,
@@ -529,9 +458,9 @@ namespace VpnHood.Client
 
             // report Suppressed
             if (response.SuppressedTo == SuppressType.YourSelf)
-                VhLogger.Instance.LogWarning($"You suppressed a session of yourself!");
+                _logger.LogWarning($"You suppressed a session of yourself!");
             else if (response.SuppressedTo == SuppressType.Other)
-                VhLogger.Instance.LogWarning($"You suppressed a session of another client!");
+                _logger.LogWarning($"You suppressed a session of another client!");
 
             // add current stream as a channel
             if (UseUdpChannel && response.UdpPort != 0)
@@ -540,7 +469,7 @@ namespace VpnHood.Client
             await ManageDatagramChannels(cancellationToken);
 
             // done
-            VhLogger.Instance.LogInformation(GeneralEventId.Hello, $"Hurray! Client has connected! SessionId: {VhLogger.FormatSessionId(response.SessionId)}, ServerId: {response.ServerId}, ServerVersion: {response.ServerVersion}");
+            _logger.LogInformation(GeneralEventId.Hello, $"Hurray! Client has connected! SessionId: {VhLogger.FormatSessionId(SessionId)}");
             Connected = true;
         }
 
@@ -570,8 +499,6 @@ namespace VpnHood.Client
 
         internal async Task<T> SendRequest<T>(Stream stream, RequestCode requestCode, object request, CancellationToken cancellationToken) where T : BaseResponse
         {
-            if (_disposed) throw new ObjectDisposedException(VhLogger.FormatTypeName(this));
-
             // log this request
             var eventId = requestCode switch
             {
@@ -580,7 +507,7 @@ namespace VpnHood.Client
                 RequestCode.TcpProxyChannel => GeneralEventId.StreamChannel,
                 _ => GeneralEventId.Tcp
             };
-            VhLogger.Instance.LogTrace(eventId, $"Sending a request... RequestCode: {requestCode}");
+            _logger.LogTrace(eventId, $"Sending a request... RequestCode: {requestCode}");
 
             // building request
             using var mem = new MemoryStream();
@@ -593,7 +520,7 @@ namespace VpnHood.Client
 
             // Reading the response
             var response = await StreamUtil.ReadJsonAsync<T>(stream, cancellationToken);
-            VhLogger.Instance.LogTrace(eventId, $"Received a response... ResponseCode: {response.ResponseCode}");
+            _logger.LogTrace(eventId, $"Received a response... ResponseCode: {response.ResponseCode}");
 
             // set SessionStatus
             if (response.AccessUsage != null)
@@ -607,11 +534,9 @@ namespace VpnHood.Client
                 case ResponseCode.SessionSuppressedBy:
                 case ResponseCode.AccessExpired:
                 case ResponseCode.AccessTrafficOverflow:
-                case ResponseCode.UnsupportedClient:
                     SessionStatus.ResponseCode = response.ResponseCode;
                     SessionStatus.ErrorMessage = response.ErrorMessage;
                     SessionStatus.SuppressedBy = response.SuppressedBy;
-                    Dispose();
                     throw new Exception(response.ErrorMessage);
 
                 // Restore connected state by any ok return
@@ -625,16 +550,6 @@ namespace VpnHood.Client
             }
         }
 
-        private void Dispose(Exception ex)
-        {
-            if (SessionStatus.ResponseCode == ResponseCode.Ok)
-            {
-                SessionStatus.ResponseCode = ResponseCode.GeneralError;
-                SessionStatus.ErrorMessage = ex.Message;
-            }
-            Dispose();
-        }
-
         public void Dispose()
         {
             lock (this)
@@ -645,45 +560,39 @@ namespace VpnHood.Client
 
             if (State == ClientState.None) return;
 
-            VhLogger.Instance.LogInformation("Disconnecting...");
+            _logger.LogInformation("Disconnecting...");
             if (State == ClientState.Connecting || State == ClientState.Connected)
                 State = ClientState.Disconnecting;
+
             _cancellationTokenSource.Cancel();
+            _packetCapture.OnPacketArrivalFromInbound -= PacketCapture_OnPacketArrivalFromInbound;
 
             // log suppressedBy
-            if (SessionStatus.SuppressedBy == SuppressType.YourSelf) VhLogger.Instance.LogWarning($"You suppressed by a session of yourself!");
-            else if (SessionStatus.SuppressedBy == SuppressType.Other) VhLogger.Instance.LogWarning($"You suppressed a session of another client!");
+            if (SessionStatus.SuppressedBy == SuppressType.YourSelf) _logger.LogWarning($"You suppressed by a session of yourself!");
+            else if (SessionStatus.SuppressedBy == SuppressType.Other) _logger.LogWarning($"You suppressed a session of another client!");
 
-            // shutdown
-            VhLogger.Instance.LogInformation("Shutting down...");
-            _intervalCheckTimer?.Dispose();
-
-            VhLogger.Instance.LogTrace($"Disposing {VhLogger.FormatTypeName<TcpProxyHost>()}...");
+            _logger.LogTrace($"Disposing {VhLogger.FormatTypeName<TcpProxyHost>()}...");
             _tcpProxyHost?.Dispose();
 
-            VhLogger.Instance.LogTrace($"Disposing {VhLogger.FormatTypeName<Tunnel>()}...");
-            if (Tunnel != null)
-            {
-                Tunnel.OnPacketReceived -= Tunnel_OnPacketReceived;
-                Tunnel.OnChannelRemoved -= Tunnel_OnChannelRemoved;
-                Tunnel.Dispose();
-            }
+            _logger.LogTrace($"Disposing {VhLogger.FormatTypeName<Tunnel>()}...");
+            Tunnel?.Dispose();
+
+            // shutdown
+            _logger.LogInformation("Shutting down...");
 
             // dispose NAT
-            VhLogger.Instance.LogTrace($"Disposing {VhLogger.FormatTypeName(Nat)}...");
+            _logger.LogTrace($"Disposing {VhLogger.FormatTypeName(Nat)}...");
             Nat.Dispose();
 
             // close PacketCapture
-            _packetCapture.OnStopped -= PacketCature_OnStopped;
-            _packetCapture.OnPacketArrivalFromInbound -= PacketCapture_OnPacketArrivalFromInbound;
             if (!_leavePacketCaptureOpen)
             {
-                VhLogger.Instance.LogTrace($"Disposing the PacketCapture...");
+                _logger.LogTrace($"Disposing Captured Device...");
                 _packetCapture.Dispose();
             }
 
             State = ClientState.Disposed;
-            VhLogger.Instance.LogInformation("Bye Bye!");
+            _logger.LogInformation("Bye Bye!");
         }
     }
 }

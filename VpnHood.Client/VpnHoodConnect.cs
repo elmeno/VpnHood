@@ -14,7 +14,6 @@ namespace VpnHood.Client
         private readonly Token _token;
         private DateTime _reconnectTime = DateTime.MinValue;
         private readonly ClientOptions _clientOptions;
-        private bool _clientRegistered;
 
         public event EventHandler ClientStateChanged;
         public int AttemptCount { get; private set; }
@@ -49,20 +48,14 @@ namespace VpnHood.Client
 
             if (Client.State == ClientState.Disposed)
                 Client = new VpnHoodClient(_packetCapture, _clientId, _token, _clientOptions);
-
             Client.StateChanged += Client_StateChanged;
-            _clientRegistered = true;
             return Client.Connect();
         }
 
         public void Disconnect()
         {
-            if (_clientRegistered)
-            {
-                Client.StateChanged -= Client_StateChanged;
-                Client.Dispose();
-                _clientRegistered = false;
-            }
+            Client.StateChanged -= Client_StateChanged;
+            Client.Dispose();
         }
 
         private void Client_StateChanged(object sender, EventArgs e)
@@ -84,7 +77,7 @@ namespace VpnHood.Client
 
             // check reconnecting
             var resposeCode = Client.SessionStatus.ResponseCode;
-            var reconnect = AttemptCount < MaxReconnectCount && Client.ReceivedByteCount > 0 &&
+            var reconnect = AttemptCount < MaxReconnectCount &&
                 (resposeCode == ResponseCode.GeneralError || resposeCode == ResponseCode.SessionClosed || resposeCode == ResponseCode.InvalidSessionId);
 
             if (reconnect)
