@@ -7,6 +7,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using VpnHood.Common;
+using VpnHood.Logging;
 
 namespace VpnHood.Server.AccessServers
 {
@@ -17,8 +19,35 @@ namespace VpnHood.Server.AccessServers
         public string ValidCertificateThumbprint { get; set; }
         public Uri BaseUri { get; }
 
-        public RestAccessServer(Uri baseUri, string authHeader)
+        private static string AppFolderPath => Path.GetDirectoryName(typeof(RestAccessServer).Assembly.Location);
+        private static string WorkingFolderPath { get; set; } = AppFolderPath;
+        public string StoragePath { get; }
+        private readonly string _sslCertificatesPassword = null;
+        public string CertsFolderPath => Path.Combine(StoragePath, "certificates");
+        public string GetCertFilePath(IPEndPoint ipEndPoint) => Path.Combine(CertsFolderPath, ipEndPoint.ToString().Replace(":", "-") + ".pfx");
+        public X509Certificate2 DefaultCert { get; }
+
+
+        private static X509Certificate2 CreateSelfSignedCertificate(string certFilePath, string password)
         {
+            // VhLogger.Instance.LogInformation($"Creating Certificate file: {certFilePath}");
+            var certificate = CertificateUtil.CreateSelfSigned();
+            var buf = certificate.Export(X509ContentType.Pfx, password);
+            Directory.CreateDirectory(Path.GetDirectoryName(certFilePath));
+            File.WriteAllBytes(certFilePath, buf);
+            return new X509Certificate2(certFilePath, password, X509KeyStorageFlags.Exportable);
+        }
+
+        public RestAccessServer(string storagePath, Uri baseUri, string authHeader)
+        {
+            
+            StoragePath = storagePath ?? throw new ArgumentNullException(nameof(storagePath));
+            Directory.CreateDirectory(StoragePath);
+
+            var defaultCertFile = Path.Combine(CertsFolderPath, "default.pfx");
+            DefaultCert = File.Exists(defaultCertFile)
+                ? new X509Certificate2(defaultCertFile, _sslCertificatesPassword)
+                : CreateSelfSignedCertificate(defaultCertFile, _sslCertificatesPassword);
             //if (baseUri.Scheme != Uri.UriSchemeHttps)
             //  throw new ArgumentException("baseUri must be https!", nameof(baseUri));
 
@@ -82,7 +111,18 @@ namespace VpnHood.Server.AccessServers
         public Task<Access> AddUsage(AddUsageParams addUsageParams) =>
             SendRequest<Access>(nameof(AddUsage), addUsageParams, HttpMethod.Post, true);
 
-        public Task<byte[]> GetSslCertificateData(string serverEndPoint) =>
-            SendRequest<byte[]>(nameof(GetSslCertificateData), new { serverEndPoint }, HttpMethod.Get, false);
+        // public Task<byte[]> GetSslCertificateData(string serverEndPoint) =>
+            // SendRequest<byte[]>(nameof(GetSslCertificateData), new { serverEndPoint }, HttpMethod.Get, false);
+
+        private X509Certificate2 GetSslCertificate(IPEndPoint serverEndPoint, bool returnDefaultIfNotFound)
+        {
+            var certFilePath = GetCertFilePath(serverEndPoint);
+            if (returnDefaultIfNotFound && !File.Exists(certFilePath))
+                return DefaultCert;
+            return new X509Certificate2(certFilePath, _sslCertificatesPassword, X509KeyStorageFlags.Exportable);
+        }
+
+        public Task<byte[]> GetSslCertificateData(string serverEndPoint)
+            => Task.FromResult(GetSslCertificate(Util.ParseIpEndPoint(serverEndPoint), true).Export(X509ContentType.Pfx));
     }
 }

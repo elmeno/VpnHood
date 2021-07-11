@@ -199,7 +199,8 @@ namespace VpnHood.Server.App
         {
             if (AppSettings.RestBaseUrl != null)
             {
-                _restAccessServer = new RestAccessServer(AppSettings.RestBaseUrl, AppSettings.RestAuthHeader)
+                var accessServerFolder = Path.Combine(WorkingFolderPath, "access");
+                _restAccessServer = new RestAccessServer(accessServerFolder, AppSettings.RestBaseUrl, AppSettings.RestAuthHeader)
                 {
                     ValidCertificateThumbprint = AppSettings.RestCertificateThumbprint
                 };
