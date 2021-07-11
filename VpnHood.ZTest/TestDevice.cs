@@ -16,9 +16,13 @@ namespace VpnHood.Test
 
         public string OperatingSystemInfo => Environment.OSVersion.ToString() + ", " + (Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit");
 
-        public bool IsExcludeAppsSupported => false;
+        public bool IsExcludeApplicationsSupported => false;
 
-        public bool IsIncludeAppsSupported => false;
+        public bool IsIncludeApplicationsSupported => false;
+
+        public bool IsExcludeNetworksSupported => true;
+
+        public bool IsIncludeNetworksSupported => true;
 
         public DeviceAppInfo[] InstalledApps => throw new NotSupportedException();
 

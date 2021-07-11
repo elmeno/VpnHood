@@ -62,9 +62,9 @@
 
 /*---------------------Default Style--------------------*/
 
-.app-title {
+h1, h2, h3 {
     font-family: 'Arial-Narow-Bold';
-    font-size: 20px;
+    font-size: 30px;
 }
 
 #stateText {

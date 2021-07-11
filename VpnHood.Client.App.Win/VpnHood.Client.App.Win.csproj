@@ -17,9 +17,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <PackageId>VpnHood.Client.App.Win</PackageId>
     <StartupObject></StartupObject>
-    <Version>1.2.250</Version>
-    <AssemblyVersion>1.2.250</AssemblyVersion>
-    <FileVersion>1.2.250</FileVersion>
+    <Version>1.2.247</Version>
+    <AssemblyVersion>1.2.247</AssemblyVersion>
+    <FileVersion>1.2.247</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -56,7 +56,7 @@
 
   <ItemGroup>
     <PackageReference Include=" " Version="1.0.664.37" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.864.35" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.818.41" />
   </ItemGroup>
 
   <ItemGroup>

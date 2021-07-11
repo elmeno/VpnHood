@@ -26,20 +26,21 @@ namespace VpnHood.Client.Device.Android
         private FileInputStream _inStream; // Packets to be sent are queued in this input stream.
         private FileOutputStream _outStream; // Packets received need to be written to this output stream.
         private int _mtu;
-        private IPAddress[] _dnsServers = new IPAddress[] { IPAddress.Parse("8.8.8.8"), IPAddress.Parse("8.8.4.4") };
         public const string VpnServiceName = "VpnHood";
         public event EventHandler<PacketCaptureArrivalEventArgs> OnPacketArrivalFromInbound;
         public event EventHandler OnStopped;
         public bool Started => _mInterface != null;
-        public bool IsIncludeNetworksSupported => true;
-        public IpNetwork[] IncludeNetworks { get; set; }
-        public bool IsPassthruSupported => false;
+
+        public IPNetwork[] ExcludeNetworks { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public IPNetwork[] IncludeNetworks { get => throw new NotSupportedException(); set => throw new NotImplementedException(); }
+        public bool IsExcludeNetworksSupported => false;
+        public bool IsIncludeNetworksSupported => false;
 
         #region Application Filter
-        public bool IsExcludeAppsSupported => true;
-        public bool IsIncludeAppsSupported => true;
-        public string[] ExcludeApps { get; set; } = Array.Empty<string>();
-        public string[] IncludeApps { get; set; } = Array.Empty<string>();
+        public bool IsExcludeApplicationsSupported => true;
+        public bool IsIncludeApplicationsSupported => true;
+        public string[] ExcludeApplications { get; set; } = Array.Empty<string>();
+        public string[] IncludeApplications { get; set; } = Array.Empty<string>();
         #endregion
 
         public AppVpnService()
@@ -69,39 +70,14 @@ namespace VpnHood.Client.Device.Android
             }
         }
 
-        public bool IsDnsServersSupported => true;
-        public IPAddress[] DnsServers
-        {
-            get => _dnsServers;
-            set
-            {
-                if (Started)
-                    throw new InvalidOperationException($"Could not set {nameof(DnsServers)} while {nameof(IPacketCapture)} is started!");
-                _dnsServers = value;
-            }
-        }
-
         public void StartCapture()
         {
             var builder = new Builder(this)
                 .SetBlocking(true)
                 .SetSession(VpnServiceName)
-                .AddAddress("192.168.0.100", 24);
-
-            // dnsServers
-            if (DnsServers != null && DnsServers.Length >0)
-                foreach (var dnsServer in DnsServers)
-                    builder.AddDnsServer(dnsServer.ToString());
-            else
-                builder.AddDnsServer("8.8.8.8");
-
-            // Routes
-            if (IncludeNetworks != null && IncludeNetworks.Length > 0)
-                foreach (var network in IncludeNetworks)
-                    builder.AddRoute(network.Prefix.ToString(), network.PrefixLength);
-            else
-                builder.AddRoute("0.0.0.0", 0);
-
+                .AddAddress("192.168.0.100", 24)
+                .AddDnsServer("8.8.8.8")
+                .AddRoute("0.0.0.0", 0);
 
             // set mtu
             if (Mtu != 0)
@@ -110,16 +86,16 @@ namespace VpnHood.Client.Device.Android
             var packageName = ApplicationContext.PackageName;
 
             // Applications Filter
-            if (IncludeApps != null && IncludeApps.Length > 0)
+            if (IncludeApplications != null && IncludeApplications.Length > 0)
             {
-                foreach (var app in IncludeApps)
+                foreach (var app in IncludeApplications)
                     builder.AddAllowedApplication(app);
-                if (IncludeApps.FirstOrDefault(x => x == packageName) == null)
+                if (IncludeApplications.FirstOrDefault(x => x == packageName) == null)
                     builder.AddAllowedApplication(packageName);
             }
 
-            if (ExcludeApps != null && ExcludeApps.Length > 0)
-                foreach (var app in ExcludeApps.Where(x => x != packageName))
+            if (ExcludeApplications != null && ExcludeApplications.Length > 0)
+                foreach (var app in ExcludeApplications.Where(x => x != packageName))
                     builder.AddDisallowedApplication(app);
 
             // try to stablish the connection
@@ -128,7 +104,7 @@ namespace VpnHood.Client.Device.Android
             //Packets to be sent are queued in this input stream.
             _inStream = new FileInputStream(_mInterface.FileDescriptor);
 
-            //Packets received need to be written to this output stream.
+            //b. Packets received need to be written to this output stream.
             _outStream = new FileOutputStream(_mInterface.FileDescriptor);
 
             Task.Run(ReadingPacketTask);
@@ -174,13 +150,11 @@ namespace VpnHood.Client.Device.Android
             }
         }
 
-        public void SendPacketToInbound(IEnumerable<IPPacket> ipPackets)
+        public void SendPacketToInbound(IPPacket[] ipPackets)
         {
             foreach (var ipPacket in ipPackets)
                 _outStream.Write(ipPacket.Bytes);
         }
-
-        public bool IsProtectSocketSuported => true;
 
         public void ProtectSocket(System.Net.Sockets.Socket socket)
         {

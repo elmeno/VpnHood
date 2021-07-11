@@ -9,8 +9,10 @@ namespace VpnHood.Client.Device
         Task<IPacketCapture> CreatePacketCapture();
         string OperatingSystemInfo { get; }
         DeviceAppInfo[] InstalledApps { get; }
-        bool IsExcludeAppsSupported { get; }
-        bool IsIncludeAppsSupported { get; }
+        bool IsExcludeApplicationsSupported { get; }
+        bool IsIncludeApplicationsSupported { get; }
+        bool IsExcludeNetworksSupported { get; }
+        bool IsIncludeNetworksSupported { get; }
     }
 
 }

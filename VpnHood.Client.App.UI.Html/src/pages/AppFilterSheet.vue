@@ -100,7 +100,7 @@ export default {
   computed: {
     sheetVisible: {
       get() {
-        return this.$route.query.appfilter != null;
+        return this.$route.query.appFilter != null;
       },
       set(value) {
         if (!value && !this.isRouterBusy) {
@@ -130,13 +130,13 @@ export default {
         value: 'All',
       }];
 
-      if (this.store.features.isExcludeAppsSupported)
+      if (this.store.features.isExcludeApplicationsSupported)
         filterModes.push({
           text: this.$t('appFilterExclude'),
           value: 'Exclude',
         });
 
-      if (this.store.features.isIncludeAppsSupported)
+      if (this.store.features.isIncludeApplicationsSupported)
         filterModes.push({
           text: this.$t('appFilterInclude'),
           value: 'Include',

@@ -1,5 +1,5 @@
 
-# VpnHood <img src="https://github.com/vpnhood/VpnHood/wiki/images/logo-vpnhood.png" width="32">
+# VpnHood (Beta Version) <img src="https://github.com/vpnhood/VpnHood/wiki/images/logo-vpnhood.png" width="32">
 Undetectable VPN for ordinary users and experts. VpnHood is a solution to bypass Advanced Firewall and can circumvent deep packet inspection. VpnHood has been created from scratch entirely in C#.
 
 ## Client Download
@@ -49,7 +49,7 @@ You are always Welcome!
 Windows|Linux
 
 ## Special Thanks
-* [SharpPcap](https://github.com/chmorgan/sharppcap): Fully managed, cross platform .NET library for capturing packets from live and file based devices.
+* [SharpPcap](https://github.com/unosquare/embedio): Fully managed, cross platform .NET library for capturing packets from live and file based devices.
 * [WinDivert](https://reqrypt.org/windivert.html): a user-mode packet capture-and-divert package for Windows.
 * [EmbedIO](https://github.com/unosquare/embedio): A tiny, cross-platform, module based web server for .NET.
 * [Advanced Installer](https://www.advancedinstaller.com): Installer tools for Windows.

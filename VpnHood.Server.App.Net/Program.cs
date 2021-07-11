@@ -47,7 +47,8 @@ namespace VpnHood.Server.App
 
             // Report current Version
             // Replace dot in version to prevent anonymouizer treat it as ip.
-            VhLogger.Instance.LogInformation($"VpnHoodServer. Version: {AssemblyName.Version.ToString().Replace('.', ',')}\n OS: {OperatingSystemInfo}");
+            VhLogger.Instance.LogInformation($"VpnHoodServer. Version: {AssemblyName.Version.ToString().Replace('.', ',')}");
+            VhLogger.Instance.LogInformation($"OS: {OperatingSystemInfo}");
 
             //Init AppData
             LoadAppData();
@@ -299,9 +300,10 @@ namespace VpnHood.Server.App
                 // check FileAccessServer
                 if (_fileAccessServer != null && _fileAccessServer.GetAllTokenIds().Length == 0)
                 {
-                    VhLogger.Instance.LogWarning(
-                        "There is no token in the store! Use the following command to create one:\n " +
-                        "dotnet VpnHoodServer.dll gen -?");
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    VhLogger.Instance.LogInformation("There is no token in the store! Use the following command to create one:");
+                    VhLogger.Instance.LogInformation("dotnet VpnHoodServer.dll gen -?");
+                    Console.ResetColor();
                 }
 
                 // run server
@@ -309,9 +311,7 @@ namespace VpnHood.Server.App
                 {
                     TcpHostEndPoint = new IPEndPoint(IPAddress.Any, portNumber),
                     Tracker = _googleAnalytics,
-                    IsDiagnoseMode = AppSettings.IsDiagnoseMode,
-                    OrgStreamReadBufferSize = AppSettings.OrgStreamReadBufferSize,
-                    TunnelStreamReadBufferSize = AppSettings.TunnelStreamReadBufferSize,
+                    IsDiagnoseMode = AppSettings.IsDiagnoseMode
                 });
 
                 // Command watcher

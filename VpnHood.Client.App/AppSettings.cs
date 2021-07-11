@@ -9,7 +9,7 @@ namespace VpnHood.Client.App
     public class AppSettings
     {
         public string SettingsFilePath { get; private set; }
-        public UserSettings UserSettings { get; set; } = new();
+        public AppUserSettings UserSettings { get; set; } = new AppUserSettings();
         public Guid ClientId { get; set; } = Guid.NewGuid();
         public Guid? TestServerTokenIdAutoAdded { get; set; }
         public Guid? TestServerTokenId => Token.FromAccessKey(TestServerAccessKey).TokenId;

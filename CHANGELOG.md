@@ -1,48 +1,4 @@
-﻿# Upcoming
-### Client
-* Feature: Android: Exclude local networks fron VPN
-* Feature: Android: Add to device notification bar
-* Update: Imporve Performance and Memory usage
-* Fix: Didn't bypass Some local network traffics
-
-### Server
-* Update: Imporve Performance and Memory usage
-
-
-# v1.2.250
-### Client
-* Update: Display error for unsupported client
-* Fix: Random Crash!
-* Fix: No error message when Client lost the connection
-
-### Server
-* Update: Check session id for each UdpPacket
-* Update: Reject unSupported client
-* Fix: Updater on linux
-* Fix: Nlog maxArchiveDays maxArchiveFiles
-
-# v1.2.249
-* Feature: Reset apps TCP connections immediately after VPN get connected
-* Update: Significantly optimize performance & stability
-* Update: Improve power usage
-
-### Client
-* Fix: Attempting to connect after stopping the VPN
-
-# v1.2.248
-### Client
-* Feature: Windows 7 Support
-* Feature: Add "What's New" link in the main menu
-* Fix: Windows: Display Main window location depending on TaskBar position
-* Fix: Freeze network after auto reconnect
-* Fix: Freeze network when UDP connection lost
-* Fix: Freeze network after network lost
-* Fix: Selecting current active server causes disconnection
-
-### Developer
-* Fix: Public Server in Android Sample
-
-# v1.2.247
+﻿# v1.2.247
 * Feature: Add UDP Protocol
 * Update: Improve datagram performance
 * Update: Improve overall performance
@@ -217,9 +173,6 @@
 
 # v1.1.75
 * Initial Release
-
-
-
 
 
 

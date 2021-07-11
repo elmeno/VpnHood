@@ -14,6 +14,8 @@ namespace VpnHood.Server
         private bool _disposed;
         private Timer _reportTimer;
         private readonly TcpHost _tcpHost;
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
+        private ILogger _logger => VhLogger.Instance;
 
         public SessionManager SessionManager { get; }
         public ServerState State { get; private set; } = ServerState.NotStarted;
@@ -35,15 +37,7 @@ namespace VpnHood.Server
                 endPoint: options.TcpHostEndPoint,
                 sessionManager: SessionManager,
                 sslCertificateManager: new SslCertificateManager(accessServer),
-                tcpClientFactory: options.TcpClientFactory)
-            {
-                OrgStreamReadBufferSize = options.OrgStreamReadBufferSize,
-                TunnelStreamReadBufferSize = options.TunnelStreamReadBufferSize
-            };
-
-            // Configure thread pool size
-            ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
-            ThreadPool.SetMinThreads(workerThreads, completionPortThreads * 30);
+                tcpClientFactory: options.TcpClientFactory);
         }
 
         /// <summary>
@@ -51,7 +45,7 @@ namespace VpnHood.Server
         /// </summary>
         public Task Start()
         {
-            using var _ = VhLogger.Instance.BeginScope("Server");
+            using var _ = _logger.BeginScope("Server");
             if (_disposed) throw new ObjectDisposedException(nameof(VpnHoodServer));
 
             if (State != ServerState.NotStarted)
@@ -59,16 +53,12 @@ namespace VpnHood.Server
 
             State = ServerState.Starting;
 
-            // report config
-            ThreadPool.GetMinThreads(out int workerThreads, out int completionPortThreads);
-            VhLogger.Instance.LogInformation($"MinWorkerThreads: {workerThreads}, CompletionPortThreads: {completionPortThreads}");
-
             // Starting hosts
-            VhLogger.Instance.LogTrace($"Starting {VhLogger.FormatTypeName<TcpHost>()}...");
+            _logger.LogTrace($"Starting {VhLogger.FormatTypeName<TcpHost>()}...");
             _tcpHost.Start();
 
             State = ServerState.Started;
-            VhLogger.Instance.LogInformation($"Server is ready!");
+            _logger.LogInformation("Server is ready!");
 
             if (IsDiagnoseMode)
                 _reportTimer = new Timer(ReportStatus, null, 0, 5 * 60000);
@@ -86,13 +76,8 @@ namespace VpnHood.Server
             var serverIdFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VpnHood.Server", "ServerId");
             if (!File.Exists(serverIdFile))
             {
-                var random = new Random();
-                var bytes = new byte[8];
-                random.NextBytes(bytes);
-                var newId = BitConverter.ToUInt64(bytes, 0).ToString();
-
                 Directory.CreateDirectory(Path.GetDirectoryName(serverIdFile));
-                File.WriteAllText(serverIdFile, newId);
+                File.WriteAllText(serverIdFile, TunnelUtil.RandomLong().ToString());
             }
 
             return File.ReadAllText(serverIdFile);
@@ -104,20 +89,20 @@ namespace VpnHood.Server
                 return;
             _disposed = true;
 
-            using var _ = VhLogger.Instance.BeginScope("Server");
-            VhLogger.Instance.LogInformation("Shutting down...");
+            using var _ = _logger.BeginScope("Server");
+            _logger.LogInformation("Shutting down...");
 
-            VhLogger.Instance.LogTrace($"Disposing {VhLogger.FormatTypeName<TcpHost>()}...");
+            _logger.LogTrace($"Disposing {VhLogger.FormatTypeName<TcpHost>()}...");
             _tcpHost.Dispose();
 
-            VhLogger.Instance.LogTrace($"Disposing {VhLogger.FormatTypeName<SessionManager>()}...");
+            _logger.LogTrace($"Disposing {VhLogger.FormatTypeName<SessionManager>()}...");
             SessionManager.Dispose();
 
-            VhLogger.Instance.LogTrace($"Disposing {VhLogger.FormatTypeName<Nat>()}...");
+            _logger.LogTrace($"Disposing {VhLogger.FormatTypeName<Nat>()}...");
 
             _reportTimer?.Dispose();
             State = ServerState.Disposed;
-            VhLogger.Instance.LogInformation("Bye Bye!");
+            _logger.LogInformation("Bye Bye!");
         }
     }
 }

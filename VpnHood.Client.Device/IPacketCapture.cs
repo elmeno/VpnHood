@@ -1,7 +1,5 @@
 ﻿using PacketDotNet;
 using System;
-using System.Collections.Generic;
-using System.Net;
 
 namespace VpnHood.Client.Device
 {
@@ -11,31 +9,38 @@ namespace VpnHood.Client.Device
         void StopCapture();
         bool Started { get; }
         event EventHandler OnStopped;
-        bool IsPassthruSupported { get; }
-        
-        bool IsDnsServersSupported { get; }
-        IPAddress[] DnsServers { get; set; }
 
-        bool IsExcludeAppsSupported { get; }
-        bool IsIncludeAppsSupported { get; }
+        bool IsExcludeApplicationsSupported { get; }
+        bool IsIncludeApplicationsSupported { get; }
         
         /// <summary>
         /// Unique id of excluded applications 
         /// </summary>
-        string[] ExcludeApps { get; set; }
+        string[] ExcludeApplications { get; set; }
         
         /// <summary>
         /// Unique id of included applications
         /// </summary>
-        string[] IncludeApps { get; set; }
-        IpNetwork[] IncludeNetworks { get; set; }
+        string[] IncludeApplications { get; set; }
+
+        bool IsExcludeNetworksSupported { get; }
+        bool IsIncludeNetworksSupported { get; }
+        
+        /// <summary>
+        /// packets sent to this ip will not be captured
+        /// </summary>
+        IPNetwork[] ExcludeNetworks { get; set; }
+
+        /// <summary>
+        /// if set, then only packet sent to this network will be captured
+        /// </summary>
+        IPNetwork[] IncludeNetworks { get; set; }
 
         bool IsMtuSupported { get;}
         int Mtu { get; set; }
 
-        bool IsProtectSocketSuported { get; }
         void ProtectSocket(System.Net.Sockets.Socket socket);
-        void SendPacketToInbound(IEnumerable<IPPacket> packets);
+        void SendPacketToInbound(IPPacket[] packet);
         event EventHandler<PacketCaptureArrivalEventArgs> OnPacketArrivalFromInbound;
     }
 }

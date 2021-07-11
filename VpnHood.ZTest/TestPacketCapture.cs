@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Net;
 using VpnHood.Client.Device.WinDivert;
-using VpnHood.Tunneling;
 
 namespace VpnHood.Test
 {
@@ -32,21 +31,21 @@ namespace VpnHood.Test
             // let server outbound call, go out: Tcp
             else if (ipPacket.Protocol == ProtocolType.Tcp)
             {
-                var tcpPacket = PacketUtil.ExtractTcp(ipPacket);
+                var tcpPacket = ipPacket.Extract<TcpPacket>();
                 sendOut = tcpPacket.SourcePort >= ServerMinPort && tcpPacket.SourcePort <= ServerMaxPort;
             }
             
             // let server outbound call, go out: Udp
             else if (ipPacket.Protocol == ProtocolType.Udp)
             {
-                var udpPacket = PacketUtil.ExtractUdp(ipPacket);
+                var udpPacket = ipPacket.Extract<UdpPacket>();
                 sendOut = udpPacket.SourcePort >= ServerMinPort && udpPacket.SourcePort <= ServerMaxPort;
             }
             
             // let server outbound call, go out: Icmp
             else if (ipPacket.Protocol == ProtocolType.Icmp)
             {
-                //var icmpPacket = PacketUtil.ExtractIcmp(ipPacket);
+                //var icmpPacket = ipPacket.Extract<IcmpV4Packet>();
                 sendOut = ipPacket.TimeToLive == (ServerPingTtl - 1);
             }
             

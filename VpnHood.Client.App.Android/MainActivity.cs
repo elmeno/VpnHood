@@ -13,7 +13,7 @@ using VpnHood.Client.Device.Android;
 
 namespace VpnHood.Client.App.Android
 {
-    [Activity(Label = "@string/app_name",
+    [Activity(Label = "VpnHood",
         Icon = "@mipmap/ic_launcher",
         Theme = "@android:style/Theme.DeviceDefault.NoActionBar",
         MainLauncher = true, AlwaysRetainTaskState = true, LaunchMode = LaunchMode.SingleInstance,
@@ -21,12 +21,10 @@ namespace VpnHood.Client.App.Android
         ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize | ConfigChanges.LayoutDirection | ConfigChanges.Keyboard | ConfigChanges.KeyboardHidden | ConfigChanges.FontScale | ConfigChanges.Locale | ConfigChanges.Navigation | ConfigChanges.UiMode)]
     public class MainActivity : Activity
     {
+        public WebView WebView { get; private set; }
         private VpnHoodAppUI _appUi;
         private const int REQUEST_VpnPermission = 10;
         private AndroidDevice Device => (AndroidDevice)AndroidApp.Current.Device;
-        
-        public WebView WebView { get; private set; }
-        public Color BackgroudColor => Resources.GetColor(Resource.Color.colorBackground, null);
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -81,10 +79,10 @@ namespace VpnHood.Client.App.Android
         private void InitSplashScreen()
         {
             var imageView = new ImageView(this);
-            imageView.SetImageResource(Resource.Mipmap.ic_launcher_round);
+            imageView.SetImageResource(Resource.Mipmap.ic_launcher);
             imageView.LayoutParameters = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent);
             imageView.SetScaleType(ImageView.ScaleType.CenterInside);
-            //imageView.SetBackgroundColor(Color);
+            //imageView.SetBackgroundColor(Android.Graphics.Color.Blue);
             SetContentView(imageView);
         }
 
@@ -94,12 +92,11 @@ namespace VpnHood.Client.App.Android
             webViewClient.PageLoaded += WebViewClient_PageLoaded;
 
             WebView = new WebView(this);
-            WebView.SetBackgroundColor(BackgroudColor);
             WebView.SetWebViewClient(webViewClient);
             WebView.Settings.JavaScriptEnabled = true;
             WebView.Settings.DomStorageEnabled = true;
             WebView.Settings.JavaScriptCanOpenWindowsAutomatically = true;
-            WebView.Settings.SetSupportMultipleWindows(true);
+            //WebView.Settings.SetSupportMultipleWindows(true);
             WebView.SetLayerType(LayerType.Hardware, null);
 #if DEBUG
             WebView.SetWebContentsDebuggingEnabled(true);
@@ -110,7 +107,7 @@ namespace VpnHood.Client.App.Android
         private void WebViewClient_PageLoaded(object sender, System.EventArgs e)
         {
             SetContentView(WebView);
-            Window.SetStatusBarColor(BackgroudColor);
+            Window.SetStatusBarColor(new Color(0x19, 0x40, 0xb0));
         }
 
         public override void OnBackPressed()

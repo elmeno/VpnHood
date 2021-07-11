@@ -23,8 +23,7 @@ namespace VpnHood.Server
         private DateTime _lastCleanupTime = DateTime.MinValue;
         private IAccessServer AccessServer { get; }
 
-        public string ServerId { get; }
-        public string ServerVersion { get; }
+        public string ServerId { get; private set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
         private ILogger _logger => VhLogger.Instance;
@@ -35,7 +34,6 @@ namespace VpnHood.Server
             _udpClientFactory = udpClientFactory ?? throw new ArgumentNullException(nameof(udpClientFactory));
             _tracker = tracker;
             ServerId = serverId;
-            ServerVersion = typeof(TcpHost).Assembly.GetName().Version.ToString();
         }
 
         public Session FindSessionByClientId(Guid clientId)
@@ -187,9 +185,10 @@ namespace VpnHood.Server
         public void ReportStatus()
         {
             Cleanup(true);
-            string msg = $"*** ReportStatus ***, ";
+            var msg = $"*** GC Collect ***, ";
             msg += $"ActiveSessionCount: {_sessions.Count(x => !x.Value.IsDisposed)}, ";
             msg += $"DisposedSessionCount: {_sessions.Count(x => x.Value.IsDisposed)}, ";
+            msg += $"TotalStreamChannel: {_sessions.Sum(x => x.Value.Tunnel.StreamChannels.Length)}, ";
             msg += $"TotalDatagramChannel: {_sessions.Sum(x => x.Value.Tunnel.DatagramChannels.Length)}";
             _logger.LogInformation(msg);
         }
