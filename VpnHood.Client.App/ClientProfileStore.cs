@@ -14,7 +14,7 @@ namespace VpnHood.Client.App
     public class ClientProfileStore
     {
         private const string FILENAME_Profiles = "profiles.json";
-        private const string FILENAME_Tokens = "tokens.json";
+        // private const string FILENAME_Tokens = "tokens.json";
         private readonly string _folderPath;
         private Token[] _tokens;
         // private string TokensFileName => Path.Combine(_folderPath, FILENAME_Tokens);
@@ -46,7 +46,7 @@ namespace VpnHood.Client.App
                     }
                     catch (Exception ex)
                     {
-                        RemoveClientProfile(clientProfile.ClientProfileId);
+                        // RemoveClientProfile(clientProfile.ClientProfileId);
                         VhLogger.Instance.LogError($"Could not load token {clientProfile.TokenId}", ex.Message);
                     }
                 }
@@ -132,7 +132,7 @@ namespace VpnHood.Client.App
             Directory.CreateDirectory(Path.GetDirectoryName(ClientProfilesFileName));
 
             // remove not used tokens
-            _tokens = _tokens.Where(x => ClientProfiles.Any(y => y.TokenId == x.TokenId)).ToArray();
+            // _tokens = _tokens.Where(x => ClientProfiles.Any(y => y.TokenId == x.TokenId)).ToArray();
 
             // save all
             // File.WriteAllText(TokensFileName, JsonSerializer.Serialize(_tokens));

@@ -36,10 +36,12 @@ namespace VpnHood.Client
         internal Nat Nat { get; }
         internal Tunnel Tunnel { get; private set; }
         public int Timeout { get; set; }
-        public Token Token { get; }
+        public string Token { get; }
         public Guid ClientId { get; }
         public int SessionId { get; private set; }
         public byte[] SessionKey { get; private set; }
+        public ClientProfile ActiveClientProfile;
+        public string[] ServerEndPoints;
         public string ServerId { get; private set; }
         public bool Connected { get; private set; }
         public IPAddress TcpProxyLoopbackAddress { get; }
@@ -53,7 +55,7 @@ namespace VpnHood.Client
         public long SentByteCount => Tunnel?.SentByteCount ?? 0;
         public bool UseUdpChannel { get; set; }
 
-        public VpnHoodClient(IPacketCapture packetCapture, Guid clientId, Token token, ClientOptions options)
+        public VpnHoodClient(IPacketCapture packetCapture, Guid clientId, ClientProfile activeClientProfile, string token, ClientOptions options)
         {
             _packetCapture = packetCapture ?? throw new ArgumentNullException(nameof(packetCapture));
             _leavePacketCaptureOpen = options.LeavePacketCaptureOpen;
@@ -62,6 +64,7 @@ namespace VpnHood.Client
             DnsAddress = options.DnsAddress ?? throw new ArgumentNullException(nameof(options.DnsAddress));
             TcpProxyLoopbackAddress = options.TcpProxyLoopbackAddress ?? throw new ArgumentNullException(nameof(options.TcpProxyLoopbackAddress));
             ClientId = clientId;
+            ActiveClientProfile = activeClientProfile;
             Timeout = options.Timeout;
             Version = options.Version;
             UseUdpChannel = options.UseUdpChannel;
@@ -98,30 +101,30 @@ namespace VpnHood.Client
                     return _serverEndPoint;
 
                 var random = new Random();
-                if (Token.IsValidDns)
+                if (ActiveClientProfile.IsValidDns)
                 {
                     try
                     {
-                        _logger.LogInformation($"Resolving IP from host name: {VhLogger.FormatDns(Token.DnsName)}...");
-                        var hostEntry = Dns.GetHostEntry(Token.DnsName);
+                        _logger.LogInformation($"Resolving IP from host name: {VhLogger.FormatDns(ActiveClientProfile.DnsName)}...");
+                        var hostEntry = Dns.GetHostEntry(ActiveClientProfile.DnsName);
                         if (hostEntry.AddressList.Length > 0)
                         {
                             var index = random.Next(0, hostEntry.AddressList.Length);
                             var ip = hostEntry.AddressList[index];
-                            var serverEndPoint = Util.ParseIpEndPoint(Token.ServerEndPoint);
+                            var serverEndPoint = Util.ParseIpEndPoint(ActiveClientProfile.ServerEndPoint);
 
                             _logger.LogInformation($"{hostEntry.AddressList.Length} IP founds. {ip}:{serverEndPoint.Port} has been Selected!");
                             _serverEndPoint = new IPEndPoint(ip, serverEndPoint.Port);
                             return _serverEndPoint;
                         }
                     }
-                    catch { };
+                    catch {};
                 }
                 else
                 {
-                    _logger.LogInformation($"Extracting host from the token. Host: {VhLogger.FormatDns(Token.ServerEndPoint)}");
-                    var index = random.Next(0, Token.ServerEndPoints.Length);
-                    _serverEndPoint = Util.ParseIpEndPoint(Token.ServerEndPoints[index]);
+                    //_logger.LogInformation($"Extracting host from the token. Host: {VhLogger.FormatDns(ServerEndPoint)}");
+                    var index = random.Next(0, ActiveClientProfile.ServerEndPoints.Length);
+                    _serverEndPoint = Util.ParseIpEndPoint(ActiveClientProfile.ServerEndPoints[index]);
                     return _serverEndPoint;
                 }
 
@@ -386,8 +389,8 @@ namespace VpnHood.Client
                 var stream = new SslStream(tcpClient.GetStream(), true, UserCertificateValidationCallback);
 
                 // Establish a TLS connection
-                _logger.LogTrace(eventId, $"TLS Authenticating. HostName: {VhLogger.FormatDns(Token.DnsName)}...");
-                await stream.AuthenticateAsClientAsync(new SslClientAuthenticationOptions { TargetHost = Token.DnsName }, cancellationToken);
+                _logger.LogTrace(eventId, $"TLS Authenticating. HostName: {VhLogger.FormatDns(ActiveClientProfile.DnsName)}...");
+                await stream.AuthenticateAsClientAsync(new SslClientAuthenticationOptions { TargetHost = ActiveClientProfile.DnsName }, cancellationToken);
 
                 _lastConnectionErrorTime = null;
                 return new TcpClientStream(tcpClient, stream);
@@ -418,8 +421,8 @@ namespace VpnHood.Client
         private bool UserCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             return sslPolicyErrors == SslPolicyErrors.None ||
-                Token.CertificateHash == null ||
-                Token.CertificateHash.SequenceEqual(certificate.GetCertHash());
+                ActiveClientProfile.CertificateHash == null ||
+                ActiveClientProfile.CertificateHash.SequenceEqual(certificate.GetCertHash());
         }
 
         private async Task ConnectInternal(CancellationToken cancellationToken)
@@ -429,8 +432,8 @@ namespace VpnHood.Client
             // Encrypt ClientId
             using var aes = Aes.Create();
             aes.Mode = CipherMode.CBC;
-            aes.Key = Token.Secret;
-            aes.IV = new byte[Token.Secret.Length];
+            aes.Key = ActiveClientProfile.Secret;
+            aes.IV = new byte[ActiveClientProfile.Secret.Length];
             aes.Padding = PaddingMode.None;
             using var cryptor = aes.CreateEncryptor();
             var encryptedClientId = cryptor.TransformFinalBlock(ClientId.ToByteArray(), 0, ClientId.ToByteArray().Length);
@@ -440,7 +443,7 @@ namespace VpnHood.Client
             {
                 ClientVersion = typeof(VpnHoodClient).Assembly.GetName().Version.ToString(3),
                 ClientId = ClientId,
-                TokenId = Token.TokenId,
+                Token = Token,
                 EncryptedClientId = encryptedClientId,
                 UseUdpChannel = UseUdpChannel,
             };
