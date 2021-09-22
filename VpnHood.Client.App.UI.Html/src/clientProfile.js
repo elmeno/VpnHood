@@ -57,11 +57,11 @@ export default {
     let clientProfile = clientProfileItem.clientProfile
     if (clientProfile.name && clientProfile.name.trim() != '')
       return clientProfile.name
-    else if (
-      clientProfileItem.token.name &&
-      clientProfileItem.token.name.trim() != ''
-    )
-      return clientProfileItem.token.name
+    // else if (
+    //   clientProfileItem.token.name &&
+    //   clientProfileItem.token.name.trim() != ''
+    // )
+    //   return clientProfileItem.token.name
     else return i18n.t('noname')
   },
 
@@ -72,11 +72,11 @@ export default {
     let clientProfile = clientProfileItem.clientProfile
     if (clientProfile.countryCode && clientProfile.countryCode.trim() != '')
       return clientProfile.countryCode
-    else if (
-      clientProfileItem.token.countryCode &&
-      clientProfileItem.token.countryCode.trim() != ''
-    )
-      return clientProfileItem.token.countryCode
+    // else if (
+    //   clientProfileItem.token.countryCode &&
+    //   clientProfileItem.token.countryCode.trim() != ''
+    // )
+    //   return clientProfileItem.token.countryCode
     else return i18n.t('us')
   },
 
@@ -84,8 +84,7 @@ export default {
     clientProfileId = this.updateId(clientProfileId)
 
     let clientProfileItem = this.item(clientProfileId)
-    let token = clientProfileItem.token
-    return token && token.ep.length > 0 ? token.ep[0].replace(/"/g, '') : null
+    return clientProfileItem && clientProfileItem.ServerEndPoints.length > 0 ? clientProfileItem.ServerEndPoints[0].replace(/"/g, '') : null
   },
 
   isDefault (clientProfileId) {

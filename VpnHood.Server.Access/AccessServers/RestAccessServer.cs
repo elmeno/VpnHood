@@ -72,7 +72,7 @@ namespace VpnHood.Server.AccessServers
             var uriBuilder = new UriBuilder(new Uri(BaseUri, api));
 
             // use query string
-            if (!useBody)
+            if (useBody)
             {
                 var query = System.Web.HttpUtility.ParseQueryString(string.Empty);
                 var type = paramerters.GetType();

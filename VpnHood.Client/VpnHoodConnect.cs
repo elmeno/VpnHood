@@ -11,7 +11,9 @@ namespace VpnHood.Client
         private readonly bool _leavePacketCaptureOpen;
         private readonly IPacketCapture _packetCapture;
         private readonly Guid _clientId;
-        private readonly Token _token;
+        private readonly string _token;
+        private readonly string[] _serverEndPoints;
+        private readonly ClientProfile _activeClientProfile;
         private DateTime _reconnectTime = DateTime.MinValue;
         private readonly ClientOptions _clientOptions;
 
@@ -21,7 +23,7 @@ namespace VpnHood.Client
         public int MaxReconnectCount { get; set; }
         public VpnHoodClient Client { get; private set; }
 
-        public VpnHoodConnect(IPacketCapture packetCapture, Guid clientId, Token token, ClientOptions clientOptions = null, ConnectOptions connectOptions = null)
+        public VpnHoodConnect(IPacketCapture packetCapture, Guid clientId, ClientProfile activeClientProfile, string token, ClientOptions clientOptions = null, ConnectOptions connectOptions = null)
         {
             if (connectOptions == null) connectOptions = new ConnectOptions();
 
@@ -29,6 +31,8 @@ namespace VpnHood.Client
             _packetCapture = packetCapture;
             _clientId = clientId;
             _token = token;
+            _serverEndPoints = activeClientProfile.ServerEndPoints;
+            _activeClientProfile = activeClientProfile;
             _clientOptions = clientOptions ?? new ClientOptions();
             MaxReconnectCount = connectOptions.MaxReconnectCount;
             ReconnectDelay = connectOptions.ReconnectDelay;
@@ -38,7 +42,7 @@ namespace VpnHood.Client
             _clientOptions.UseUdpChannel = connectOptions.UdpChannelMode == UdpChannelMode.On || connectOptions.UdpChannelMode == UdpChannelMode.Auto;
 
             // let always have a Client to access its member after creating VpnHoodConnect
-            Client = new VpnHoodClient(_packetCapture, _clientId, _token, _clientOptions);
+            Client = new VpnHoodClient(_packetCapture, _clientId, activeClientProfile, _token, _clientOptions);
         }
 
         public Task Connect()
@@ -47,7 +51,7 @@ namespace VpnHood.Client
                 throw new InvalidOperationException("Connection is already in progress!");
 
             if (Client.State == ClientState.Disposed)
-                Client = new VpnHoodClient(_packetCapture, _clientId, _token, _clientOptions);
+                Client = new VpnHoodClient(_packetCapture, _clientId, _activeClientProfile, _token, _clientOptions);
             Client.StateChanged += Client_StateChanged;
             return Client.Connect();
         }

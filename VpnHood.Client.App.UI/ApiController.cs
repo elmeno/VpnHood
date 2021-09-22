@@ -117,7 +117,7 @@ namespace VpnHood.Client.App.UI
         [Route(HttpVerbs.Post, "/" + nameof(addTestServer))]
         public void addTestServer()
         {
-            App.ClientProfileStore.AddAccessKey(App.Settings.TestServerAccessKey);
+            // App.ClientProfileStore.AddAccessKey(App.Settings.TestServerAccessKey);
         }
 
         [Route(HttpVerbs.Post, "/" + nameof(setUserSettings))]

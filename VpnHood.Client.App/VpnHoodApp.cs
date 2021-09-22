@@ -79,11 +79,11 @@ namespace VpnHood.Client.App
             VhLogger.Instance = CreateLogger(false);
 
             // add default test public server if not added yet
-            RemoveClientProfileByToken(Guid.Parse("2C02AC41-040F-4576-B8CC-DCFE5B9170B7")); //old one; deprecated in version v1.2.247 and upper
-            if (Settings.TestServerTokenIdAutoAdded != Settings.TestServerTokenId)
-                Settings.TestServerTokenIdAutoAdded = ClientProfileStore.AddAccessKey(Settings.TestServerAccessKey).TokenId;
+            // RemoveClientProfileByToken(Guid.Parse("2C02AC41-040F-4576-B8CC-DCFE5B9170B7")); //old one; deprecated in version v1.2.247 and upper
+            // if (Settings.TestServerTokenIdAutoAdded != Settings.TestServerTokenId)
+            //     Settings.TestServerTokenIdAutoAdded = ClientProfileStore.AddAccessKey(Settings.TestServerAccessKey).TokenId;
 
-            Features.TestServerTokenId = Settings.TestServerTokenId;
+            // Features.TestServerTokenId = Settings.TestServerTokenId;
             Features.IsExcludeApplicationsSupported = Device.IsExcludeApplicationsSupported;
             Features.IsIncludeApplicationsSupported = Device.IsIncludeApplicationsSupported;
             Features.IsIncludeNetworksSupported = Device.IsIncludeNetworksSupported;
@@ -311,15 +311,18 @@ namespace VpnHood.Client.App
             VhLogger.Instance.LogInformation($"OS: {Device.OperatingSystemInfo}");
             VhLogger.Instance.LogInformation($"UserAgent: {userAgent}");
 
-      // get token
-      var token = ActiveClientProfile.Token;
-      VhLogger.Instance.LogInformation($"TokenId: {VhLogger.FormatId(token.TokenId)}, SupportId: {VhLogger.FormatId(token.SupportId)}, ServerEndPoint: {VhLogger.FormatDns(token.ServerEndPoint)}");
+          // get token
+          var token = ActiveClientProfile.Token;
+            VhLogger.Instance.LogInformation($"TokenId: {VhLogger.FormatId(token.TokenId)}, SupportId: {VhLogger.FormatId(token.SupportId)}, ServerEndPoint: {VhLogger.FormatDns(token.ServerEndPoint)}");
+
+            VhLogger.Instance.LogInformation($"ClientProfile.ServerEndPoint: {VhLogger.FormatDns(ActiveClientProfile.ServerEndPoint)}");
 
             // Create Client
             _clientConnect = new VpnHoodConnect(
                 packetCapture: packetCapture,
                 clientId: Settings.ClientId,
-                token: token,
+                activeClientProfile: ActiveClientProfile,
+                token: Settings.Token,
                 new ClientOptions
                 {
                     Timeout = Timeout,
