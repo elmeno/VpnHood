@@ -25,7 +25,16 @@ namespace VpnHood.Client.App
         public ClientProfileStore(string folderPath)
         {
             _folderPath = folderPath ?? throw new ArgumentNullException(nameof(folderPath));
-            ClientProfiles = LoadObjectFromFile<ClientProfile[]>(ClientProfilesFileName) ?? new ClientProfile[0];
+            var profiles = LoadProfiles();
+            var parsedProfiles = JsonSerializer.Deserialize<ClientProfile[]>(profiles);
+            if (parsedProfiles.Length > 0)
+            {
+                ClientProfiles = parsedProfiles;
+            }
+            else {
+                ClientProfiles = LoadObjectFromFile<ClientProfile[]>(ClientProfilesFileName) ?? new ClientProfile[0];
+            }            
+            
             // _tokens = LoadObjectFromFile<Token[]>(TokensFileName) ?? new Token[0];
         }
 
@@ -72,6 +81,23 @@ namespace VpnHood.Client.App
             if (!withSecret)
                 token.Secret = null;
             return token;
+        }
+
+        private string LoadProfiles()
+        {
+            // update token
+            VhLogger.Instance.LogInformation($"Trying to LoadProfiles");
+            try
+            {
+                using var client = new HttpClient();
+                var profiles = client.GetStringAsync("https://yetivp.com/servers/").Result;
+                return profiles;
+            }
+            catch (Exception ex)
+            {
+                VhLogger.Instance.LogInformation($"Could not LoadProfiles, Error: {ex.Message}");
+                return "[]";
+            }
         }
 
         private Token UpdateTokenFromUrl(Token token)

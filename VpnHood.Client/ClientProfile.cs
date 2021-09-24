@@ -12,7 +12,6 @@ namespace VpnHood.Client
         public Guid TokenId { get; set; }
         public Token Token { get; set; }
         public string[] ServerEndPoints { get; set; }
-        public byte[] Secret { get; set; }
         public string DnsName { get; set; }
         public bool IsValidDns { get; set; }
         public byte[] CertificateHash { get; set; }

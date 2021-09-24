@@ -181,7 +181,7 @@ namespace VpnHood.Server
             var request = await StreamUtil.ReadJsonAsync<HelloRequest>(tcpClientStream.Stream, cancellationToken);
 
             // creating a session
-            _logger.LogInformation(GeneralEventId.Hello, $"Creating Session... TokenId: {VhLogger.FormatId(request.TokenId)}, ClientId: {VhLogger.FormatId(request.ClientId)}, ClientVersion: {request.ClientVersion}");
+            _logger.LogInformation(GeneralEventId.Hello, $"Creating Session... Token: {VhLogger.FormatId(request.Token)}, ClientId: {VhLogger.FormatId(request.ClientId)}, ClientVersion: {request.ClientVersion}");
             var session = await _sessionManager.CreateSession(request, clientEp.Address);
             session.UseUdpChannel = request.UseUdpChannel;
 
