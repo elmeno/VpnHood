@@ -101,14 +101,13 @@ namespace VpnHood.Server
             {
                 ClientId = helloRequest.ClientId,
                 ClientIp = clientIp.ToString(),
-                TokenId = helloRequest.TokenId,
-                UserToken = helloRequest.UserToken,
+                Token = helloRequest.Token,
                 ClientVersion = helloRequest.ClientVersion
             };
 
             // validate the token
-            _logger.Log(LogLevel.Trace, $"Validating the request. TokenId: {VhLogger.FormatId(clientIdentity.TokenId)}");
-            var accessController = await GetValidatedAccess(clientIdentity, helloRequest.EncryptedClientId);
+            _logger.Log(LogLevel.Trace, $"Validating the request. Token: {VhLogger.FormatId(clientIdentity.Token)}");
+            var accessController = await GetValidatedAccess(clientIdentity);
 
             // cleanup old timeout sessions
             Cleanup();
@@ -144,23 +143,12 @@ namespace VpnHood.Server
             return session;
         }
 
-        private async Task<AccessController> GetValidatedAccess(ClientIdentity clientIdentity, byte[] encryptedClientId)
+        private async Task<AccessController> GetValidatedAccess(ClientIdentity clientIdentity)
         {
             // get access
             var access = await AccessServer.GetAccess(clientIdentity);
             if (access == null)
-                throw new Exception($"Could not find the tokenId! {VhLogger.FormatId(clientIdentity.TokenId)}, ClientId: {VhLogger.FormatId(clientIdentity.ClientId)}");
-
-            // Validate token by shared secret
-            using var aes = Aes.Create();
-            aes.Mode = CipherMode.CBC;
-            aes.Key = access.Secret;
-            aes.IV = new byte[access.Secret.Length];
-            aes.Padding = PaddingMode.None;
-            using var cryptor = aes.CreateEncryptor();
-            var ecid = cryptor.TransformFinalBlock(clientIdentity.ClientId.ToByteArray(), 0, clientIdentity.ClientId.ToByteArray().Length);
-            if (!Enumerable.SequenceEqual(ecid, encryptedClientId))
-                throw new Exception($"The request does not have a valid signature for requested token! {VhLogger.FormatId(clientIdentity.TokenId)}, ClientId: {VhLogger.FormatId(clientIdentity.ClientId)}");
+                throw new Exception($"Could not find the tokenId! {VhLogger.FormatId(clientIdentity.Token)}, ClientId: {VhLogger.FormatId(clientIdentity.ClientId)}");
 
             // find AccessController or Create
             var accessController =

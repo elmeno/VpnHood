@@ -22,12 +22,12 @@ namespace VpnHood.Server.App
         public static AppSettings AppSettings { get; set; } = new AppSettings();
         public static AppData AppData { get; set; } = new AppData();
         public static bool IsFileAccessServer => AppSettings.RestBaseUrl == null;
-        private static FileAccessServer _fileAccessServer;
+        // private static FileAccessServer _fileAccessServer;
         private static RestAccessServer _restAccessServer;
         private static VpnHoodServer _vpnHoodServer;
         private static GoogleAnalyticsTracker _googleAnalytics;
         private static AssemblyName AssemblyName => typeof(Program).Assembly.GetName();
-        private static IAccessServer AccessServer => (IAccessServer)_fileAccessServer ?? _restAccessServer;
+        private static IAccessServer AccessServer => (IAccessServer) _restAccessServer;
         private static string AppFolderPath => Path.GetDirectoryName(typeof(Program).Assembly.Location);
         private static string WorkingFolderPath { get; set; } = AppFolderPath;
         private static string AppSettingsFilePath => Path.Combine(WorkingFolderPath, "appsettings.json");
@@ -193,13 +193,11 @@ namespace VpnHood.Server.App
                 File.WriteAllText(appDataFilePath, json);
             }
 
-            _googleAnalytics = new GoogleAnalyticsTracker(trackId: "UA-183010362-1", anonyClientId: AppData.ServerId.ToString());
+            _googleAnalytics = new GoogleAnalyticsTracker(trackId: "G-08WLL1FYJ1", anonyClientId: AppData.ServerId.ToString());
         }
 
         private static void InitAccessServer()
         {
-            if (AppSettings.RestBaseUrl != null)
-            {
                 var accessServerFolder = Path.Combine(WorkingFolderPath, "access");
                 _restAccessServer = new RestAccessServer(accessServerFolder, AppSettings.RestBaseUrl, AppSettings.RestAuthHeader)
                 {
@@ -207,18 +205,12 @@ namespace VpnHood.Server.App
                 };
                 var authHeader = string.IsNullOrEmpty(AppSettings.RestAuthHeader) ? "<Notset>" : "*****";
                 VhLogger.Instance.LogInformation($"Using ResetAccessServer!, BaseUri: {_restAccessServer.BaseUri}, AuthHeader: {authHeader}");
-            }
-            else
-            {
-                var accessServerFolder = Path.Combine(WorkingFolderPath, "access");
-                _fileAccessServer = new FileAccessServer(accessServerFolder, AppSettings.SslCertificatesPassword);
-                VhLogger.Instance.LogInformation($"Using FileAccessServer!, AccessFolder: {accessServerFolder}");
-            }
+            
         }
 
         private static void GenerateToken(CommandLineApplication cmdApp)
         {
-            var localIpAddress = Util.GetLocalIpAddress();
+     /*       var localIpAddress = Util.GetLocalIpAddress();
             cmdApp.Description = "Generate a token";
             var nameOption = cmdApp.Option("-name", $"TokenName. Default: <NoName>", CommandOptionType.SingleValue);
             var publicEndPointOption = cmdApp.Option("-ep", $"PublicEndPoint. Default: {localIpAddress}:443", CommandOptionType.SingleValue);
@@ -243,12 +235,12 @@ namespace VpnHood.Server.App
                 PrintToken(accessItem.Token.TokenId);
                 Console.WriteLine($"Store Token Count: {accessServer.GetAllTokenIds().Length}");
                 return 0;
-            });
+            });*/
         }
 
         private static void PrintToken(CommandLineApplication cmdApp)
         {
-            cmdApp.Description = "Print a token";
+/*            cmdApp.Description = "Print a token";
 
             var tokenIdArg = cmdApp.Argument("tokenId", "tokenId (Guid) or tokenSupportId (id) to print");
             cmdApp.OnExecute(() =>
@@ -268,15 +260,15 @@ namespace VpnHood.Server.App
 
                 PrintToken(tokenId);
                 return 0;
-            });
+            });*/
         }
 
         private static void PrintToken(Guid tokenId)
         {
-            var accessItem = _fileAccessServer.AccessItem_Read(tokenId).Result;
+/*            var accessItem = _fileAccessServer.AccessItem_Read(tokenId).Result;
             if (accessItem == null) throw new KeyNotFoundException($"Token does not exist! tokenId: {tokenId}");
 
-            var access = AccessServer.GetAccess(new ClientIdentity() { TokenId = tokenId }).Result;
+            var access = AccessServer.GetAccess(new ClientIdentity() { Token = tokenId.ToString() }).Result;
             if (access == null) throw new KeyNotFoundException($"Token does not exist! tokenId: {tokenId}");
 
             Console.WriteLine($"Token:");
@@ -286,7 +278,7 @@ namespace VpnHood.Server.App
             Console.WriteLine($"---");
             Console.WriteLine();
             Console.WriteLine($"Access:");
-            Console.WriteLine(JsonSerializer.Serialize(access, new JsonSerializerOptions() { WriteIndented = true }));
+            Console.WriteLine(JsonSerializer.Serialize(access, new JsonSerializerOptions() { WriteIndented = true }));*/
         }
 
         private static void StartServer(CommandLineApplication cmdApp)
@@ -298,13 +290,13 @@ namespace VpnHood.Server.App
                 var portNumber = portOption.HasValue() ? int.Parse(portOption.Value()) : AppSettings.Port;
 
                 // check FileAccessServer
-                if (_fileAccessServer != null && _fileAccessServer.GetAllTokenIds().Length == 0)
+    /*            if (_fileAccessServer != null && _fileAccessServer.GetAllTokenIds().Length == 0)
                 {
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     VhLogger.Instance.LogInformation("There is no token in the store! Use the following command to create one:");
                     VhLogger.Instance.LogInformation("dotnet VpnHoodServer.dll gen -?");
                     Console.ResetColor();
-                }
+                }*/
 
                 // run server
                 _vpnHoodServer = new VpnHoodServer(AccessServer, new ServerOptions()

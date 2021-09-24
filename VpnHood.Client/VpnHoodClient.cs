@@ -429,22 +429,12 @@ namespace VpnHood.Client
         {
             var tcpClientStream = await GetSslConnectionToServer(GeneralEventId.Hello, cancellationToken);
 
-            // Encrypt ClientId
-            using var aes = Aes.Create();
-            aes.Mode = CipherMode.CBC;
-            aes.Key = ActiveClientProfile.Secret;
-            aes.IV = new byte[ActiveClientProfile.Secret.Length];
-            aes.Padding = PaddingMode.None;
-            using var cryptor = aes.CreateEncryptor();
-            var encryptedClientId = cryptor.TransformFinalBlock(ClientId.ToByteArray(), 0, ClientId.ToByteArray().Length);
-
             // Create the hello Message
             var request = new HelloRequest()
             {
                 ClientVersion = typeof(VpnHoodClient).Assembly.GetName().Version.ToString(3),
                 ClientId = ClientId,
                 Token = Token,
-                EncryptedClientId = encryptedClientId,
                 UseUdpChannel = UseUdpChannel,
             };
 
