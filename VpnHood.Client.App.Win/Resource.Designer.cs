@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace VpnHood.Client.App {
+namespace YetiVPN.Client.App {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace VpnHood.Client.App {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("VpnHood.Client.App.Resource", typeof(Resource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("YetiVPN.Client.App.Resource", typeof(Resource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -103,9 +103,9 @@ namespace VpnHood.Client.App {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon YetiVPNIcon {
+        internal static System.Drawing.Icon VpnKeyIcon {
             get {
-                object obj = ResourceManager.GetObject("YetiVPNIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("VpnKeyIcon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
@@ -113,9 +113,9 @@ namespace VpnHood.Client.App {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon VpnKeyIcon {
+        internal static System.Drawing.Icon YetiVPNIcon {
             get {
-                object obj = ResourceManager.GetObject("VpnKeyIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("YetiVPNIcon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

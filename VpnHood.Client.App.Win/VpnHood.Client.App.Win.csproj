@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>VpnHood.Client.App</RootNamespace>
+    <RootNamespace>YetiVPN.Client.App</RootNamespace>
     <AssemblyName>YetiVPN</AssemblyName>
     <ApplicationIcon>Resources\YetiVPN.ico</ApplicationIcon>
     <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>

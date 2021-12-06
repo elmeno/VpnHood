@@ -7,7 +7,7 @@ namespace VpnHood.Client.App
     {
         public AppOptions()
         {
-            AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "YetiVPN");
+            AppDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "YetiVPN"); //LocalApplicationData), "YetiVPN");
         }
 
         public string AppDataPath { get; set; }

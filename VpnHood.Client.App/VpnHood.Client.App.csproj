@@ -7,10 +7,10 @@
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
     <Copyright>2021 YETI APPS LTD</Copyright>
     <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
-    <PackageIcon>VpnHood.png</PackageIcon>
+    <PackageIcon>YetiVPN.png</PackageIcon>
     <RepositoryUrl>https://yetivp.com</RepositoryUrl>
     <Description>Readymade Vpn App skeleton for VpnHood clients. You just need to create a UI on it.</Description>
-    <PackageId>VpnHood.Client.App</PackageId>
+    <PackageId>YetiVPN.Client.App</PackageId>
     <Version>1.2.247</Version>
     <AssemblyVersion>1.2.247</AssemblyVersion>
     <FileVersion>1.2.247</FileVersion>

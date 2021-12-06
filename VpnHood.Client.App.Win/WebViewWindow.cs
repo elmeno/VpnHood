@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YetiVPN.Client.App;
 
 namespace VpnHood.Client.App
 {

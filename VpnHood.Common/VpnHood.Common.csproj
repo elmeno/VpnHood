@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Authors>VpnHood</Authors>
+    <Authors>Yeti VPN</Authors>
     <Company />
     <Copyright>2020 VpnHood</Copyright>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
     <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
     <RepositoryUrl>https://yetivp.com</RepositoryUrl>
-    <Product>VpnHood.Common</Product>
-    <PackageId>VpnHood.Common</PackageId>
-    <PackageIcon>VpnHood.png</PackageIcon>
+    <Product>Yeti VPN.Common</Product>
+    <PackageId>Yeti VPN.Common</PackageId>
+    <PackageIcon>YetiVPN.png</PackageIcon>
     <LangVersion>latestMajor</LangVersion>
-    <Description>VpnHood Common Library is shared among all other VpnHood modules.</Description>
+    <Description>Yeti VPN Common Library is shared among all other VpnHood modules.</Description>
     <Version>1.2.247</Version>
     <AssemblyVersion>1.2.247</AssemblyVersion>
     <FileVersion>1.2.247</FileVersion>

@@ -5,7 +5,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <RootNamespace>VpnHood.Test</RootNamespace>
+    <RootNamespace>Yeti VPN.Test</RootNamespace>
 
     <StartupObject></StartupObject>
 

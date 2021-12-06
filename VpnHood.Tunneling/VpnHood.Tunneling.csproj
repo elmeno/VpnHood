@@ -2,19 +2,19 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace>VpnHood.Tunneling</RootNamespace>
+    <RootNamespace>Yeti VPN.Tunneling</RootNamespace>
     <AssemblyName>YetiVPN.Tunneling</AssemblyName>
-    <Authors>VpnHood</Authors>
-    <Company>VpnHood</Company>
+    <Authors>Yeti VPN</Authors>
+    <Company>YETI APPS LTD</Company>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
     <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
     <RepositoryUrl>https://yetivp.com</RepositoryUrl>
     <PackageTags></PackageTags>
     <Copyright>2020 VpnHood</Copyright>
     <LangVersion>9.0</LangVersion>
-    <PackageId>VpnHood.Tunneling</PackageId>
-    <PackageIcon>VpnHood.png</PackageIcon>
-    <Product>VpnHood.Tunneling</Product>
+    <PackageId>Yeti VPN.Tunneling</PackageId>
+    <PackageIcon>YetiVPN.png</PackageIcon>
+    <Product>Yeti VPN.Tunneling</Product>
     <Description>Provides tunnelling classes and protocols shared between VpnHood.Client and VpnHood.Server.</Description>
     <Version>1.2.247</Version>
     <AssemblyVersion>1.2.247</AssemblyVersion>

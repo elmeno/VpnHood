@@ -28,7 +28,7 @@ namespace VpnHood.Client.App.UI
 
         public static VpnHoodAppUI Current => _current ?? throw new InvalidOperationException($"{nameof(VpnHoodAppUI)} has not been initialized yet!");
         public static bool IsInit => _current != null;
-        public static VpnHoodAppUI Init(Stream zipStream, int defaultPort = 9090)
+        public static VpnHoodAppUI Init(Stream zipStream, int defaultPort = 6714)
         {
             var ret = new VpnHoodAppUI(zipStream, defaultPort);
             ret.Start();
@@ -61,11 +61,35 @@ namespace VpnHood.Client.App.UI
             if (!VpnHoodApp.IsInit) throw new InvalidOperationException($"{nameof(VpnHoodApp)} has not been initialized!");
             if (Started) throw new InvalidOperationException($"{nameof(VpnHoodAppUI)} has been already started!");
 
-            Url = $"http://{Util.GetFreeEndPoint(IPAddress.Loopback, DefaultPort)}";
+            // Url = $"http://{Util.GetFreeEndPoint(IPAddress.Loopback, DefaultPort)}";
+            Url = $"http://local.yetivp.com:{6714}";
             _server = CreateWebServer(Url, GetSpaPath());
             try { Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>(); } catch { }
             return _server.RunAsync();
         }
+
+        public static IPEndPoint GetFreeEndPoint(string defaultDomain, IPAddress ipAddress, int defaultPort = 0)
+        {
+            try
+            {
+                // check recommended port
+                var listener = new TcpListener(ipAddress, defaultPort);
+                listener.Start();
+                var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+                listener.Stop();
+                return new IPEndPoint(ipAddress, port);
+            }
+            catch when (defaultPort != 0)
+            {
+                // try any port
+                var listener = new TcpListener(ipAddress, 0);
+                listener.Start();
+                var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+                listener.Stop();
+                return new IPEndPoint(ipAddress, port);
+            }
+        }
+
 
         public void Stop()
         {

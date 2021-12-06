@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace VpnHood.Client.App.UI {
+namespace YetiVPN.Client.App.UI {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace VpnHood.Client.App.UI {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("VpnHood.Client.App.UI.AppUIResource", typeof(AppUIResource).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("YetiVPN.Client.App.UI.AppUIResource", typeof(AppUIResource).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

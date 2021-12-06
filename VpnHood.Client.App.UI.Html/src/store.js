@@ -8,10 +8,10 @@ export default {
   cultures: [
     { value: 'en', isRtl: false, name: 'English', nativeName: 'English' }
   ],
-  title: i18n.t('appName'),
+  title: 'YETI VPN Service',
   serverUrl:
     process.env.NODE_ENV === 'development'
-      ? 'http://127.0.0.1:9090'
+      ? 'http://local.yetivp.com:6714'
       : window.location.origin,
   features: null,
   state: null,

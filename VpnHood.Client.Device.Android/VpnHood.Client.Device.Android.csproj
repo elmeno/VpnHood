@@ -10,8 +10,8 @@
     <TemplateGuid>{9ef11e43-1701-4396-8835-8392d57abb70}</TemplateGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>VpnHood.Client.Device.Android</RootNamespace>
-    <AssemblyName>VpnHood.Client.Device.Android</AssemblyName>
+    <RootNamespace>YetiVPN.Client.Device.Android</RootNamespace>
+    <AssemblyName>YetiVPN.Client.Device.Android</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <Deterministic>True</Deterministic>
     <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
@@ -70,11 +70,11 @@
   <ItemGroup>
     <ProjectReference Include="..\VpnHood.Client.Device\VpnHood.Client.Device.csproj">
       <Project>{ca6d2e1d-bcc2-4f8e-b78d-d28ebd943831}</Project>
-      <Name>VpnHood.Client.Device</Name>
+      <Name>YetiVPN.Client.Device</Name>
     </ProjectReference>
     <ProjectReference Include="..\VpnHood.Common\VpnHood.Common.csproj">
       <Project>{4c474eaa-eb63-424c-bcfa-ae2ae2067736}</Project>
-      <Name>VpnHood.Common</Name>
+      <Name>Yeti VPN.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Authors>VpnHood</Authors>
-    <Company>VpnHood</Company>
+    <Authors>Yeti VPN</Authors>
+    <Company>YETI APPS LTD</Company>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
     <Copyright>2020 VpnHood</Copyright>
     <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
     <RepositoryUrl>https://yetivp.com</RepositoryUrl>
-    <PackageIcon>VpnHood.png</PackageIcon>
-    <Description>VpnHood client device provider for Windows using WinDivert.</Description>
+    <PackageIcon>YetiVPN.png</PackageIcon>
+    <Description>Yeti VPN client device provider for Windows using WinDivert.</Description>
     <Version>1.2.247</Version>
-    <PackageId>VpnHood.Client.Device.WinDivert</PackageId>
+    <PackageId>YetiVPN.Client.Device.WinDivert</PackageId>
     <Version>1.1.226</Version>
     <AssemblyVersion>1.2.247</AssemblyVersion>
     <FileVersion>1.2.247</FileVersion>

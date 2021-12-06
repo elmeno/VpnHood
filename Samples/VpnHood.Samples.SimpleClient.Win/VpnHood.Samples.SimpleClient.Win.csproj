@@ -4,9 +4,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Description>Simple VpnHood Client usage</Description>
-    <Product>VpnHood Samples</Product>
-    <Company>VpnHood</Company>
-    <Authors>VpnHood</Authors>
+    <Product>Yeti VPN Samples</Product>
+    <Company>YETI APPS LTD</Company>
+    <Authors>Yeti VPN</Authors>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
   </PropertyGroup>
 

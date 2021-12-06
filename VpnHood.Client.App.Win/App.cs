@@ -10,6 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using YetiVPN.Client.App.UI;
+using YetiVPN.Client.App;
 
 namespace VpnHood.Client.App
 {
@@ -55,11 +57,11 @@ namespace VpnHood.Client.App
             }
 
             // configuring Windows Firewall
-            try
-            {
-                OpenLocalFirewall(appDataPath);
-            }
-            catch { };
+             try
+             {
+                 OpenLocalFirewall(appDataPath);
+             }
+             catch { };
 
             // init app
             _app = VpnHoodApp.Init(new WinAppProvider(), new AppOptions() { LogToConsole = logToConsole });
@@ -68,7 +70,7 @@ namespace VpnHood.Client.App
             // auto connect
             if (autoConnect && _app.UserSettings.DefaultClientProfileId != null &&
                 _app.ClientProfileStore.ClientProfileItems.Any(x => x.ClientProfile.ClientProfileId == _app.UserSettings.DefaultClientProfileId))
-                _app.Connect(_app.UserSettings.DefaultClientProfileId.Value).GetAwaiter();
+                 _app.Connect(_app.UserSettings.DefaultClientProfileId.Value).GetAwaiter();
 
             // create notification icon
             InitNotifyIcon();

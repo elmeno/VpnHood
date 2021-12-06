@@ -2,16 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace>VpnHood.Client.App.UI</RootNamespace>
+    <RootNamespace>YetiVPN.Client.App.UI</RootNamespace>
     <AssemblyName>YetiVPN.App.UI</AssemblyName>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
-    <Authors>VpnHood</Authors>
-    <Company>VpnHood</Company>
+    <Authors>Yeti VPN</Authors>
+    <Company>YETI APPS LTD</Company>
     <RepositoryUrl>https://yetivp.com</RepositoryUrl>
     <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
-    <PackageIcon>VpnHood.png</PackageIcon>
+    <PackageIcon>YetiVPN.png</PackageIcon>
     <Description>Readymade Vpn App skeleton for VpnHood clients. You just need to add build a UI on it.</Description>
-    <PackageId>VpnHood.Client.App.UI</PackageId>
+    <PackageId>YetiVPN.Client.App.UI</PackageId>
     <Version>1.2.247</Version>
     <AssemblyVersion>1.2.247</AssemblyVersion>
     <FileVersion>1.2.247</FileVersion>
