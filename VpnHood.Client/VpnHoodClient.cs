@@ -101,34 +101,9 @@ namespace VpnHood.Client
                     return _serverEndPoint;
 
                 var random = new Random();
-                if (ActiveClientProfile.IsValidDns)
-                {
-                    try
-                    {
-                        _logger.LogInformation($"Resolving IP from host name: {VhLogger.FormatDns(ActiveClientProfile.DnsName)}...");
-                        var hostEntry = Dns.GetHostEntry(ActiveClientProfile.DnsName);
-                        if (hostEntry.AddressList.Length > 0)
-                        {
-                            var index = random.Next(0, hostEntry.AddressList.Length);
-                            var ip = hostEntry.AddressList[index];
-                            var serverEndPoint = Util.ParseIpEndPoint(ActiveClientProfile.ServerEndPoint);
-
-                            _logger.LogInformation($"{hostEntry.AddressList.Length} IP founds. {ip}:{serverEndPoint.Port} has been Selected!");
-                            _serverEndPoint = new IPEndPoint(ip, serverEndPoint.Port);
-                            return _serverEndPoint;
-                        }
-                    }
-                    catch {};
-                }
-                else
-                {
-                    //_logger.LogInformation($"Extracting host from the token. Host: {VhLogger.FormatDns(ServerEndPoint)}");
-                    var index = random.Next(0, ActiveClientProfile.ServerEndPoints.Length);
-                    _serverEndPoint = Util.ParseIpEndPoint(ActiveClientProfile.ServerEndPoints[index]);
-                    return _serverEndPoint;
-                }
-
-                throw new Exception("Could not resolve Server Address!");
+                var index = random.Next(0, ActiveClientProfile.ServerEndPoints.Length);
+                _serverEndPoint = Util.ParseIpEndPoint(ActiveClientProfile.ServerEndPoints[index]);
+                return _serverEndPoint;
             }
         }
 
@@ -527,10 +502,13 @@ namespace VpnHood.Client
                 case ResponseCode.SessionSuppressedBy:
                 case ResponseCode.AccessExpired:
                 case ResponseCode.AccessTrafficOverflow:
+                case ResponseCode.AccessInvalid:
+                case ResponseCode.AccessUnpaid:
                     SessionStatus.ResponseCode = response.ResponseCode;
                     SessionStatus.ErrorMessage = response.ErrorMessage;
                     SessionStatus.SuppressedBy = response.SuppressedBy;
-                    throw new Exception(response.ErrorMessage);
+                    return response;
+                    // throw new Exception(response.ErrorMessage);
 
                 // Restore connected state by any ok return
                 case ResponseCode.Ok:

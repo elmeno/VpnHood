@@ -1,6 +1,6 @@
 {
   "name": "yetivpn",
-  "version": "1.0.121",
+  "version": "1.0.151",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

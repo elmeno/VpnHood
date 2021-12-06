@@ -1,20 +1,23 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <Authors>VpnHood</Authors>
-    <Company>VpnHood</Company>
+    <Authors>YETI APPS LTD</Authors>
+    <Company>YETI APPS LTD</Company>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
-    <Copyright>2020 VpnHood</Copyright>
-    <PackageProjectUrl>https://github.com/vpnhood/vpnhood</PackageProjectUrl>
+    <Copyright>2021 YETI APPS LTD</Copyright>
+    <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
     <PackageIcon>VpnHood.png</PackageIcon>
-    <RepositoryUrl>https://github.com/vpnhood/vpnhood</RepositoryUrl>
+    <RepositoryUrl>https://yetivp.com</RepositoryUrl>
     <Description>Readymade Vpn App skeleton for VpnHood clients. You just need to create a UI on it.</Description>
     <PackageId>VpnHood.Client.App</PackageId>
     <Version>1.2.247</Version>
     <AssemblyVersion>1.2.247</AssemblyVersion>
     <FileVersion>1.2.247</FileVersion>
     <LangVersion>9.0</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>yetivpncert.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyName>YetiVPN.App</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

@@ -97,6 +97,9 @@ namespace VpnHood.Server
             AccessStatusCode.Ok => ResponseCode.Ok,
             AccessStatusCode.Expired => ResponseCode.AccessExpired,
             AccessStatusCode.TrafficOverflow => ResponseCode.AccessTrafficOverflow,
+            AccessStatusCode.NotRegistered => ResponseCode.AccessInvalid,
+            AccessStatusCode.TokenInvalid => ResponseCode.AccessInvalid,
+            AccessStatusCode.Unpaid => ResponseCode.AccessUnpaid,
             _ => ResponseCode.GeneralError,
         };
 

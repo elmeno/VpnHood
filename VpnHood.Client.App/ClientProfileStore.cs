@@ -34,7 +34,7 @@ namespace VpnHood.Client.App
             else {
                 ClientProfiles = LoadObjectFromFile<ClientProfile[]>(ClientProfilesFileName) ?? new ClientProfile[0];
             }            
-            
+            Save();
             // _tokens = LoadObjectFromFile<Token[]>(TokensFileName) ?? new Token[0];
         }
 
@@ -49,8 +49,7 @@ namespace VpnHood.Client.App
                     {
                         ret.Add(new ClientProfileItem()
                         {
-                            ClientProfile = clientProfile,
-                            Token = clientProfile.Token
+                            ClientProfile = clientProfile
                         });
                     }
                     catch (Exception ex)
@@ -130,12 +129,9 @@ namespace VpnHood.Client.App
             // find token
             if (clientProfile.ClientProfileId == Guid.Empty) throw new ArgumentNullException(nameof(clientProfile.ClientProfileId), "ClientProfile does not have ClientProfileId");
             if (clientProfile.TokenId == Guid.Empty) throw new ArgumentNullException(nameof(clientProfile.TokenId), "ClientProfile does not have tokenId");
-            var token = clientProfile.Token; //make sure tokenId is valid
 
             // fix name
             clientProfile.Name = clientProfile.Name?.Trim();
-            if (clientProfile.Name == token.Name?.Trim())
-                clientProfile.Name = null;
 
             //replace old; preserve the order
             var index = -1;

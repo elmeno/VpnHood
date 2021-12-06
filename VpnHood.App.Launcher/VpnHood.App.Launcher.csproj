@@ -7,8 +7,8 @@
     <Company>VpnHood</Company>
     <Copyright>2020 VpnHood</Copyright>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/vpnhood/vpnhood</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/vpnhood/vpnhood</PackageProjectUrl>
+    <RepositoryUrl>https://yetivp.com</RepositoryUrl>
+    <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
     <AssemblyName>run</AssemblyName>
     <PackageId>VpnHood.App.Launcher</PackageId>
     <PackageIcon>VpnHood.png</PackageIcon>

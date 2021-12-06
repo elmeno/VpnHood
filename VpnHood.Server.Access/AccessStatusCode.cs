@@ -6,5 +6,8 @@
         Expired,
         TrafficOverflow,
         Error,
+        NotRegistered,
+        TokenInvalid,
+        Unpaid
     }
 }

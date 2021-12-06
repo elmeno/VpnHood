@@ -49,16 +49,16 @@
           <!-- <img src="@/assets/images/logo-small.png" :alt="$t('appName')" /> -->
           <!-- <h1 class="">{{ $t("appName") }}</h1> -->
         <!-- </v-col> -->
-        <v-col cols="3" class="text-right pa-0 ma-0">
+        <!-- <v-col cols="3" class="text-right pa-0 ma-0"> -->
           <!-- Menu -->
-          <ClientProfileMenu
+          <!-- <ClientProfileMenu
             clientProfileId="$"
             color="white"
             :showAddServerItem="true"
             :showDeleteItem="false"
             :showRenameItem="false"
-          />
-        </v-col>
+          /> -->
+        <!-- </v-col> -->
       </v-row>
 
       <!-- Speed -->
@@ -252,12 +252,12 @@
 </style>
 
 <script>
-import ClientProfileMenu from "../components/ClientProfileMenu";
+// import ClientProfileMenu from "../components/ClientProfileMenu";
 
 export default {
   name: "HomePage",
   components: {
-    ClientProfileMenu
+    // ClientProfileMenu
   },
   created() {
     this.store.setTitle(this.$t("home"));

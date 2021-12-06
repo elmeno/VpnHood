@@ -1,12 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Authors>VpnHood</Authors>
     <Company>VpnHood</Company>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
     <Copyright>2020 VpnHood</Copyright>
-    <PackageProjectUrl>https://github.com/vpnhood/vpnhood</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/vpnhood/vpnhood</RepositoryUrl>
+    <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
+    <RepositoryUrl>https://yetivp.com</RepositoryUrl>
     <PackageIcon>VpnHood.png</PackageIcon>
     <Description>VpnHood client device provider for Windows using WinDivert.</Description>
     <Version>1.2.247</Version>
@@ -14,6 +14,9 @@
     <Version>1.1.226</Version>
     <AssemblyVersion>1.2.247</AssemblyVersion>
     <FileVersion>1.2.247</FileVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>yetivpncert.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyName>YetiVPN.Client.Device.WinDivert</AssemblyName>
   </PropertyGroup>
   
   <ItemGroup>
@@ -25,6 +28,7 @@
   
   <ItemGroup>
     <PackageReference Include="SharpPcap" Version="6.0.0" />
+    <PackageReference Include="StrongNamer" Version="0.2.5" />
   </ItemGroup>
 
   <ItemGroup>

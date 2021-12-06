@@ -1,8 +1,10 @@
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-import Home from './pages/Home.vue';
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Home from './pages/Home.vue'
+import Login from './pages/Login.vue'
+import Paywall from './pages/Paywall.vue'
 
-Vue.use(VueRouter);
+Vue.use(VueRouter)
 
 export default new VueRouter({
   mode: 'history',
@@ -10,7 +12,15 @@ export default new VueRouter({
   routes: [
     {
       path: '/',
-      redirect: '/home'
+      redirect: '/login'
+    },
+    {
+      path: '/login',
+      component: Login
+    },
+    {
+      path: '/paywall',
+      component: Paywall
     },
     {
       path: '/home',
@@ -18,8 +28,7 @@ export default new VueRouter({
     },
     {
       path: '*',
-      redirect: '/',
+      redirect: '/'
     }
   ]
-});
-
+})

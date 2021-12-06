@@ -70,7 +70,7 @@
 
 <style scoped>
 .server-item {
-  box-shadow: 0 1px 2px 1px rgb(0 0 0 / 15%);
+  /* box-shadow: 0 1px 2px 1px rgb(0 0 0 / 15%); */
   /* background-color: #eceffb; */
 }
 

@@ -12,7 +12,6 @@ namespace VpnHood.Client
         private readonly IPacketCapture _packetCapture;
         private readonly Guid _clientId;
         private readonly string _token;
-        private readonly string[] _serverEndPoints;
         private readonly ClientProfile _activeClientProfile;
         private DateTime _reconnectTime = DateTime.MinValue;
         private readonly ClientOptions _clientOptions;
@@ -31,7 +30,6 @@ namespace VpnHood.Client
             _packetCapture = packetCapture;
             _clientId = clientId;
             _token = token;
-            _serverEndPoints = activeClientProfile.ServerEndPoints;
             _activeClientProfile = activeClientProfile;
             _clientOptions = clientOptions ?? new ClientOptions();
             MaxReconnectCount = connectOptions.MaxReconnectCount;

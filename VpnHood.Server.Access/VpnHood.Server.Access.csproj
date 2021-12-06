@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -7,14 +7,16 @@
     <Authors>VpnHood</Authors>
     <Copyright>2020 VpnHood</Copyright>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/vpnhood/vpnhood</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/vpnhood/vpnhood</RepositoryUrl>
+    <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
+    <RepositoryUrl>https://yetivp.com</RepositoryUrl>
     <PackageId>VpnHood.Server.Access</PackageId>
     <PackageIcon>VpnHood.png</PackageIcon>
     <Description>Stores, and retrieves end users' access and usage. Provides required interfaces and classes to use or create an access server and accounting.</Description>
     <Version>1.2.247</Version>
     <AssemblyVersion>1.2.247</AssemblyVersion>
     <FileVersion>1.2.247</FileVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>yetivpncert.pfx</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>

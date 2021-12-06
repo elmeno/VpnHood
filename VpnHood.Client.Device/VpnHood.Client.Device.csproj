@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -8,15 +8,18 @@
     <Description>VpnHood Device abstraction</Description>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
     <Copyright>2020 VpnHood</Copyright>
-    <PackageProjectUrl>https://github.com/vpnhood/vpnhood</PackageProjectUrl>
+    <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
     <PackageIcon>VpnHood.png</PackageIcon>
-    <RepositoryUrl>https://github.com/vpnhood/vpnhood</RepositoryUrl>
+    <RepositoryUrl>https://yetivp.com</RepositoryUrl>
     <RepositoryType></RepositoryType>
     <PackageId>VpnHood.Client.Device</PackageId>
     <RootNamespace>VpnHood.Client.Device</RootNamespace>
     <Version>1.2.247</Version>
     <AssemblyVersion>1.2.247</AssemblyVersion>
     <FileVersion>1.2.247</FileVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>yetivpncert.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyName>YetiVPN.Client.Device</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

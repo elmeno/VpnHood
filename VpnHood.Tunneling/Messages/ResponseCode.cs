@@ -12,6 +12,8 @@ namespace VpnHood.Tunneling.Messages
         SessionSuppressedBy,
         AccessExpired,
         AccessTrafficOverflow,
+        AccessInvalid,
+        AccessUnpaid
     }
 
 }

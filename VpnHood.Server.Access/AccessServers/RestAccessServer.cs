@@ -106,7 +106,7 @@ namespace VpnHood.Server.AccessServers
         }
 
         public Task<Access> GetAccess(ClientIdentity clientIdentity) =>
-            SendRequest<Access>(nameof(GetAccess), clientIdentity, HttpMethod.Get, true);
+            SendRequest<Access>(nameof(GetAccess), clientIdentity, HttpMethod.Post, true);
 
         public Task<Access> AddUsage(AddUsageParams addUsageParams) =>
             SendRequest<Access>(nameof(AddUsage), addUsageParams, HttpMethod.Post, true);

@@ -1,25 +1,29 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>VpnHood.Client.App</RootNamespace>
-    <AssemblyName>YetiVPNClient</AssemblyName>
+    <AssemblyName>YetiVPN</AssemblyName>
     <ApplicationIcon>Resources\YetiVPN.ico</ApplicationIcon>
-    <PackageProjectUrl>https://github.com/vpnhood/vpnhood</PackageProjectUrl>
+    <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
     <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
-    <Authors>VpnHood</Authors>
-    <Company>VpnHood</Company>
-    <RepositoryUrl>https://github.com/vpnhood/vpnhood</RepositoryUrl>
+    <Authors>YETI APPS LTD</Authors>
+    <Company>YETI APPS LTD</Company>
+    <RepositoryUrl></RepositoryUrl>
     <PackageIcon>Resources\YetiVPN.png</PackageIcon>
     <LangVersion>9.0</LangVersion>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <PackageId>VpnHood.Client.App.Win</PackageId>
+    <PackageId>YetiVPN.Client.App.Win</PackageId>
     <StartupObject></StartupObject>
-    <Version>1.2.247</Version>
-    <AssemblyVersion>1.2.247</AssemblyVersion>
-    <FileVersion>1.2.247</FileVersion>
+    <Version>1.2.249</Version>
+    <AssemblyVersion>1.2.249</AssemblyVersion>
+    <FileVersion>1.2.249</FileVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>yetivpncert.pfx</AssemblyOriginatorKeyFile>
+    <DelaySign></DelaySign>
+    <Product>YetiVPN</Product>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

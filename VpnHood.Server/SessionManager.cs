@@ -138,7 +138,7 @@ namespace VpnHood.Server
             };
             _sessions.TryAdd(session.SessionId, session);
             _tracker?.TrackEvent("Usage", "SessionCreated").GetAwaiter();
-            _logger.Log(LogLevel.Information, $"New session has been created. SessionId: {VhLogger.FormatSessionId(session.SessionId)}");
+            _logger.Log(LogLevel.Information, $"New session has been created. SessionId: {VhLogger.FormatSessionId(session.SessionId)} clientId {VhLogger.FormatId(clientIdentity.ClientId)}");
 
             return session;
         }

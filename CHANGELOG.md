@@ -1,4 +1,4 @@
-﻿# v1.2.247
+﻿# v1.2.248
 * Feature: Add UDP Protocol
 * Update: Improve datagram performance
 * Update: Improve overall performance

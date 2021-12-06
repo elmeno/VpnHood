@@ -2,6 +2,7 @@ import pack from '../package.json'
 import i18n from './i18n'
 import clientProfile from './clientProfile'
 
+let vuem = null
 export default {
   newVersion: null,
   cultures: [
@@ -22,6 +23,7 @@ export default {
   requestedPublicServerProfileId: null,
   installedApps: null,
   newServerAdded: false,
+  isSubscribed: null,
 
   navigationItems () {
     return [
@@ -40,12 +42,126 @@ export default {
     document.title = i18n.t('appName') + ' - ' + resourceValue
   },
 
+  isLoggedIn() {
+    if (this.settings.token) {
+      return true
+    }
+    return false
+  },
+
   updateLayout (vm) {
     i18n.locale = this.userSettings.cultureName
-    //moment.locale(i18n.locale);
-    vm.$root.$vuetify.rtl = vm.$t('isRtl') == 'true'
+    // moment.locale(i18n.locale);
+    vm.$root.$vuetify.rtl = vm.$t('isRtl') === 'true'
     vm.$root.$vuetify.lang.current = this.userSettings.cultureName
     // vm.$root.$vuetify.theme.dark = this.userSettings.darkMode;
+
+    vuem = vm
+  },
+
+  async login (login, pass) {
+    try {
+      const response = await fetch('https://yetivp.com/account/login', {
+        method: 'POST',
+        // mode: 'no-cors', // no-cors, *cors, same-origin
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: JSON.stringify({
+          os: 'windows',
+          type: 'email',
+          login,
+          pass,
+          clientId: this.settings.clientId
+        })
+      })
+      // console.log('response', response)
+      const data = await response.json()
+      if (data.success) {
+        return await this.updateToken(data.token)
+      }
+      return data
+    } catch (error) {
+      // console.log('error', error)
+      return { success: false }
+    }
+  },
+
+  async register (login, pass) {
+    try {
+      const response = await fetch('https://yetivp.com/account/register', {
+        method: 'POST',
+        // mode: 'no-cors', // no-cors, *cors, same-origin
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: JSON.stringify({
+          os: 'windows',
+          type: 'email',
+          login,
+          pass,
+          clientId: this.settings.clientId
+        })
+      })
+      // console.log('response', response)
+      const data = await response.json()
+      if (data.success) {
+        return await this.updateToken(data.token)
+      }
+      return data
+    } catch (error) {
+      // console.log('error', error)
+      return { success: false }
+    }
+  },
+
+  async checkToken () {
+    try {
+      const response = await fetch('https://yetivp.com/account/token', {
+        method: 'POST',
+        // mode: 'no-cors', // no-cors, *cors, same-origin
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: JSON.stringify({
+          token: this.settings.token
+        })
+      })
+      // console.log('response', response)
+      const data = await response.json()
+      return data
+    } catch (error) {
+      // console.log('error', error)
+      return { success: false }
+    }
+  },
+
+  async updateToken (token) {
+    // POST /api/updateToken
+    const response = await this.invokeApi('updateToken', { token })
+    const data = await response.json()
+    vuem.$router.push('/home')
+    return data
+  },
+
+  async forgot (email) {
+    // POST /api/forgotPassword
+    const response = await this.invokeApi('forgotPassword', { email })
+    const data = await response.json()
+    return data
+  },
+
+  async purchase () {
+    // POST /api/purchase
+    const response = await this.invokeApi('purchase', { })
+    const data = await response.json()
+    return data
   },
 
   updateState () {
@@ -63,6 +179,10 @@ export default {
     )
   },
 
+  updateSubStatus(isSubscribed) {
+    this.isSubscribed = isSubscribed
+  },
+
   async loadApp (options) {
     if (!options)
       options = {
@@ -73,35 +193,7 @@ export default {
       }
 
     const data = await this.invoke('loadApp', options)
-    // const data = {
-    //   state: { connectionState: 'None', defaultClientProfileId: 'ams1' },
-    //   features: {},
-    //   settings: {
-    //     userSettings: {
-    //       useUdpChannel: true
-    //     }
-    //   },
-    //   clientProfileItems: [
-    //     {
-    //       id: 'ams1',
-    //       clientProfile: {
-    //         clientProfileId: 'ams1',
-    //         name: 'Amsterdam',
-    //         countryCode: 'nl',
-    //         ip: '127.0.0.1'
-    //       }
-    //     },
-    //     {
-    //       id: 'fra1',
-    //       clientProfile: {
-    //         clientProfileId: 'fra1',
-    //         name: 'Frankfurt',
-    //         countryCode: 'de',
-    //         ip: '127.0.0.1'
-    //       }
-    //     }
-    //   ]
-    // }
+
     if (options.withState) this.state = data.state
     if (options.withFeatures) this.features = data.features
     if (options.withSettings) {
@@ -113,13 +205,25 @@ export default {
 
     if (!this.userSettings.appFilters) this.userSettings.appFilters = []
     this.clientProfile.items = this.clientProfileItems
+
+    // "lastError": "Invalid SessionId!",
+    // "sessionStatusCode": "AccessInvalid",
+    if (vuem && this.state.sessionStatusCode === 'AccessInvalid') {
+      await this.updateToken('')
+      vuem.$router.push('/login')
+    }
+
+    if (vuem && !this.isSubscribed && this.state.sessionStatusCode === 'AccessUnpaid') {
+      // console.log('AccessUnpaid')
+      vuem.$router.push('/paywall')
+    }
   },
 
   saveUserSettings () {
     this.invoke('setUserSettings', this.userSettings)
   },
 
-  connect (clientProfileId, ignoreHint = false) {
+  connect (clientProfileId) {
     window.gtag('event', 'connect')
     clientProfileId = this.clientProfile.updateId(clientProfileId)
     this.state.hasDiagnosedStarted = false
@@ -127,15 +231,6 @@ export default {
     this.state.defaultClientProfileId = clientProfileId
     this.state.connectionState = 'Connecting'
 
-    // show hint
-    if (!ignoreHint) {
-      let item = this.clientProfile.item(clientProfileId)
-      if (item.token.pb) {
-        this.requestedPublicServerProfileId = clientProfileId
-        return
-      }
-    }
-    this.requestedPublicServerProfileId = null
     return this.invoke('connect', { clientProfileId })
   },
 
@@ -157,7 +252,7 @@ export default {
   connectionState (clientProfileId) {
     // if (clientProfileId) return "Diagnosing";
     clientProfileId = this.clientProfile.updateId(clientProfileId)
-    return this.state.activeClientProfileId == clientProfileId
+    return this.state.activeClientProfileId === clientProfileId
       ? this.state.connectionState
       : 'None'
   },
