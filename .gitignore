@@ -351,3 +351,6 @@ MigrationBackup/
 /Foo
 
 /VpnHood.Client.App.Win.Setup/VpnHood.Client.App.Win.Setup-cache
+/VpnHood.Client.App.Win.Setup/Build_MSIX_APPXSetupFiles/
+/VpnHood.Client.App.Win.Setup/Release
+/VpnHood.Client.App.Win.Setup/Prerequisites
