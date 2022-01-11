@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "VpnHood.Client.App.Net": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "YetiVPN.dll"
+    },
+    "RUN Thin Client": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "YetiVPN.Thin.dll"
+    }
+  }
+}
