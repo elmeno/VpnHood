@@ -7,10 +7,12 @@ using System.IO;
 using VpnHood.Client.App;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Internal;
 
 namespace YetiVPN.Service
 {
-    class App : BackgroundService
+    class App : BackgroundService //, IHostLifetime
     {
         private bool _disposed = false;
         private readonly Mutex _mutex = new(false, typeof(Program).FullName);
@@ -150,5 +152,18 @@ namespace YetiVPN.Service
 
             return Process.Start(processStart);
         }
+        /*
+        Task WaitForStartAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{nameof(App)} is already running!");
+
+        }
+
+        Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation($"{nameof(App)} is already running!");
+
+        }
+        */
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.EventLog;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting.WindowsServices;
 
 namespace YetiVPN.Service
 {
@@ -19,7 +20,9 @@ namespace YetiVPN.Service
             .ConfigureLogging(configureLogging => configureLogging.AddFilter<EventLogLoggerProvider>(level => level >= LogLevel.Information))
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<App>();
+                    //if (WindowsServiceHelpers.IsWindowsService())
+                        //services.AddSingleton<IHostLifetime, App>()
+                    //else
                     services.AddHostedService<App>()
                     .Configure<EventLogSettings>(config =>
                     {
