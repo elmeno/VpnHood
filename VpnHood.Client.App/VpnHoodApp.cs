@@ -30,7 +30,8 @@ namespace VpnHood.Client.App
     private bool _isConnecting;
     private bool _isDisconnecting;
     private bool _hasConnectRequested;
-    private VpnHoodClient Client => _clientConnect?.Client;
+        public string openURL;
+        private VpnHoodClient Client => _clientConnect?.Client;
 
     public int Timeout { get; set; }
     public Diagnoser Diagnoser { get; set; } = new Diagnoser();
@@ -124,6 +125,8 @@ namespace VpnHood.Client.App
       RecievedByteCount = Client?.ReceivedByteCount ?? 0,
       SendSpeed = Client?.SendSpeed ?? 0,
       SentByteCount = Client?.SentByteCount ?? 0,
+      OpenUrl = openURL
+
     };
 
     private Guid? DefaultClientProfileId

@@ -133,7 +133,4 @@
   <data name="YetiVPNIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\YetiVPN.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="VpnKeyIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\VpnKey.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
 </root>

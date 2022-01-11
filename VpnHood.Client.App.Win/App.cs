@@ -26,6 +26,7 @@ namespace VpnHood.Client.App
         private FileSystemWatcher _fileSystemWatcher;
         private System.Windows.Forms.Timer _uiTimer;
         private DateTime? _updater_lastCheckTime;
+        string appDataPath;
         public int CheckIntervalMinutes { get; set; } = 1 * (24 * 60); // 1 day
 
         public App()
@@ -42,7 +43,10 @@ namespace VpnHood.Client.App
             // Replace dot in version to prevent anonymouizer treat it as ip.
             VhLogger.Instance = VhLogger.CreateConsoleLogger();
             VhLogger.Instance.LogInformation($"{typeof(App).Assembly.ToString().Replace('.', ',')}");
-            var appDataPath = new AppOptions().AppDataPath; // we use defaultPath
+            var appOptions = new AppOptions(); // we use defaultPath
+            // update path to local user folder
+            appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "YetiVPN");
+            appOptions.AppDataPath = appDataPath;
             var appCommandFilePath = Path.Combine(appDataPath, "appCommand.txt");
 
             // Make single instance
@@ -57,27 +61,27 @@ namespace VpnHood.Client.App
             }
 
             // configuring Windows Firewall
-             try
-             {
-                 OpenLocalFirewall(appDataPath);
-             }
-             catch { };
+            try
+            {
+                OpenLocalFirewall(appDataPath);
+            }
+            catch { };
 
             // init app
             _app = VpnHoodApp.Init(new WinAppProvider(), new AppOptions() { LogToConsole = logToConsole });
-            _appUI = VpnHoodAppUI.Init(new MemoryStream(Resource.SPA));
+            _appUI = VpnHoodAppUI.Init(new MemoryStream(Resource.SPA), 6715);
 
             // auto connect
             if (autoConnect && _app.UserSettings.DefaultClientProfileId != null &&
                 _app.ClientProfileStore.ClientProfileItems.Any(x => x.ClientProfile.ClientProfileId == _app.UserSettings.DefaultClientProfileId))
-                 _app.Connect(_app.UserSettings.DefaultClientProfileId.Value).GetAwaiter();
+                _app.Connect(_app.UserSettings.DefaultClientProfileId.Value).GetAwaiter();
 
             // create notification icon
             InitNotifyIcon();
 
             // Create webview if installed
             if (WebViewWindow.IsInstalled)
-                _webViewWindow = new WebViewWindow(_appUI.Url, Path.Combine(_app.AppDataFolderPath, "Temp"));
+                _webViewWindow = new WebViewWindow(_appUI.Url, Path.Combine(appDataPath, "Temp"));
 
             // MainWindow
             if (openWindow)
@@ -110,7 +114,7 @@ namespace VpnHood.Client.App
             if (_notifyIcon != null)
             {
                 _notifyIcon.Text = $"{AppUIResource.AppName} - {stateName}";
-                if (_app.State.IsIdle) _notifyIcon.Icon = Resource.VpnDisconnectedIcon;
+                if (_app.State.IsIdle || _app.State.ConnectionState == AppConnectionState.None) _notifyIcon.Icon = Resource.VpnDisconnectedIcon;
                 else if (_app.State.ConnectionState == AppConnectionState.Connected) _notifyIcon.Icon = Resource.VpnConnectedIcon;
                 else _notifyIcon.Icon = Resource.VpnConnectingIcon;
             }
@@ -121,7 +125,7 @@ namespace VpnHood.Client.App
         private void CheckForUpdate()
         {
             // read last check
-            var lastCheckFilePath = Path.Combine(_app.AppDataFolderPath, "lastCheckUpdate");
+            var lastCheckFilePath = Path.Combine(appDataPath, "lastCheckUpdate");
             if (_updater_lastCheckTime == null)
             {
                 _updater_lastCheckTime = DateTime.MinValue;

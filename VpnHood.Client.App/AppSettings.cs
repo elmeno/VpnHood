@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using VpnHood.Common;
 using VpnHood.Logging;
@@ -11,10 +12,14 @@ namespace VpnHood.Client.App
 {
   public class AppSettings
   {
-    public string SettingsFilePath { get; private set; }
-    public AppUserSettings UserSettings { get; set; } = new AppUserSettings();
-    public Guid ClientId { get; set; } = Guid.NewGuid();
-    public string Token { get; set; } = "";
+        [JsonPropertyName("settingsFilePath")]
+        public string SettingsFilePath { get; private set; }
+        [JsonPropertyName("userSettings")]
+        public AppUserSettings UserSettings { get; set; } = new AppUserSettings();
+        [JsonPropertyName("clientId")]
+        public Guid ClientId { get; set; } = Guid.NewGuid();
+        [JsonPropertyName("token")]
+        public string Token { get; set; } = "";
     public event EventHandler OnSaved;
 
     public void Save()

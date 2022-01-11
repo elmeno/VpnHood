@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>YetiVPN.Client.App</RootNamespace>
     <AssemblyName>YetiVPN</AssemblyName>
     <ApplicationIcon>Resources\YetiVPN.ico</ApplicationIcon>
     <PackageProjectUrl>https://yetivp.com</PackageProjectUrl>
-    <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
+    <PackageLicenseExpression></PackageLicenseExpression>
     <Authors>YETI APPS LTD</Authors>
     <Company>YETI APPS LTD</Company>
     <RepositoryUrl></RepositoryUrl>
@@ -17,13 +17,14 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <PackageId>YetiVPN.Client.App.Win</PackageId>
     <StartupObject></StartupObject>
-    <Version>1.2.249</Version>
-    <AssemblyVersion>1.2.249</AssemblyVersion>
-    <FileVersion>1.2.249</FileVersion>
+    <Version>1.2.250</Version>
+    <AssemblyVersion>1.2.250</AssemblyVersion>
+    <FileVersion>1.2.250</FileVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>yetivpncert.pfx</AssemblyOriginatorKeyFile>
     <DelaySign></DelaySign>
-    <Product>YetiVPN</Product>
+    <Product>YETI VPN</Product>
+    <Copyright>YETI APPS LTD</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -61,6 +62,7 @@
   <ItemGroup>
     <PackageReference Include=" " Version="1.0.664.37" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.818.41" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
