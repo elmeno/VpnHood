@@ -11,7 +11,7 @@ export default {
   title: 'YETI VPN Service',
   serverUrl:
     process.env.NODE_ENV === 'development'
-      ? 'http://local.yetivp.com:6714'
+      ? 'http://127.0.0.1:6714'
       : window.location.origin,
   features: null,
   state: null,

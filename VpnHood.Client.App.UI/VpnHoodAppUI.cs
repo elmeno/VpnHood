@@ -31,7 +31,7 @@ namespace VpnHood.Client.App.UI
         public static VpnHoodAppUI Init(Stream zipStream, int defaultPort = 6714)
         {
             var ret = new VpnHoodAppUI(zipStream, defaultPort);
-            ret.Start();
+            ret.Start(defaultPort);
             return ret;
         }
 
@@ -56,13 +56,13 @@ namespace VpnHood.Client.App.UI
             _current = this;
         }
 
-        public Task Start()
+        public Task Start(int defaultPort)
         {
             if (!VpnHoodApp.IsInit) throw new InvalidOperationException($"{nameof(VpnHoodApp)} has not been initialized!");
             if (Started) throw new InvalidOperationException($"{nameof(VpnHoodAppUI)} has been already started!");
 
             // Url = $"http://{Util.GetFreeEndPoint(IPAddress.Loopback, DefaultPort)}";
-            Url = $"http://local.yetivp.com:{6714}";
+            Url = $"http://127.0.0.1:{defaultPort}";
             _server = CreateWebServer(Url, GetSpaPath());
             try { Swan.Logging.Logger.UnregisterLogger<Swan.Logging.ConsoleLogger>(); } catch { }
             return _server.RunAsync();

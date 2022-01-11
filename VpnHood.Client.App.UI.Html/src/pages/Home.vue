@@ -264,7 +264,7 @@ export default {
     this.monitorId = setInterval(() => {
       if (!document.hidden)
         this.store.updateState();
-    }, 1000);
+    }, 200);
 
   },
   beforeDestroy() {
@@ -327,13 +327,13 @@ export default {
       if (accessUsage.maxTrafficByteCount == 0)
         return null;
 
-      let mb = 1000000;
-      let gb = 1000 * mb;
+      let mb = 1048576;
+      let gb = 1024 * mb;
 
       let ret = { used: accessUsage.sentByteCount + accessUsage.receivedByteCount, total: accessUsage.maxTrafficByteCount };
       // let ret = { used: 100 * mb, total: 2000 * mb };
 
-      if (ret.total > 1000 * mb) {
+      if (ret.total > 1024 * mb) {
         ret.used = (ret.used / gb).toFixed(0) + "GB";
         ret.total = (ret.total / gb) + "GB";
       }
@@ -346,7 +346,7 @@ export default {
     },
 
     formatSpeed(speed) {
-      return (speed * 10 / 1000000).toFixed(2);
+      return (speed * 10 / 1048576).toFixed(2);
     },
   }
 }

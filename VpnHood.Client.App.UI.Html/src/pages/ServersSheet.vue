@@ -126,8 +126,9 @@ export default {
     }
   },
   methods: {
-    connect(clientProfileId) {
-      this.store.connect(clientProfileId);
+    async connect(clientProfileId) {
+      await this.store.disconnect()
+      this.store.connect(clientProfileId)
       this.$router.push({ path: '/home' })
     },
 
