@@ -152,7 +152,7 @@ namespace VpnHood.Client.App.UI
         public async Task<RequestResult> forgotPassword()
         {
             var parameters = await GetRequestDataAsync<EmailPaiload>();
-            App.openURL = "https://checkout.yetivp.com/reset?email=" + parameters.email;
+            App.openURL = "https://account.yetivp.com/reset?email=" + parameters.email;
             OpenUrl(App.openURL);
             var ret = new RequestResult()
             {
@@ -165,7 +165,7 @@ namespace VpnHood.Client.App.UI
         public async Task<RequestResult> purchase()
         {
             // var parameters = await GetRequestDataAsync<TokenPayload>();
-            App.openURL = "https://checkout.yetivp.com/?token=" + App.Settings.Token;
+            App.openURL = "https://account.yetivp.com/?token=" + App.Settings.Token;
             OpenUrl( App.openURL);
             var ret = new RequestResult()
             {
